@@ -1,138 +1,116 @@
 const Job = require("../models/Job");
 const Application = require("../models/Application");
-const User = require("../models/User");
-const calculateJobRecommendations = require("../ai/jobRecommendation");
 
-// ===============================
-// Create Job
-// ===============================
+// =====================================
+// CREATE JOB
+// POST /api/jobs
+// =====================================
+
 const createJob = async (req, res) => {
   try {
     const {
       title,
-      description,
       company,
       location,
       salaryRange,
+      description,
       skills,
     } = req.body;
 
-    console.log("=================================");
-    console.log("Creating Job...");
-    console.log("Logged in Employer ID:", req.user._id);
-    console.log("Title:", title);
-    console.log("Skills:", skills);
-    console.log("=================================");
+    if (
+      !title ||
+      !company ||
+      !location ||
+      !salaryRange ||
+      !description
+    ) {
+      return res.status(400).json({
+        message: "Please fill all required fields",
+      });
+    }
 
     const job = await Job.create({
       title,
-      description,
       company,
       location,
       salaryRange,
-      skills,
+      description,
+      skills: skills || [],
       postedBy: req.user._id,
     });
 
-    console.log("✅ Job Created Successfully");
-    console.log(job);
-
-    res.status(201).json(job);
-  } catch (err) {
-    console.error("CREATE JOB ERROR:");
-    console.error(err);
+    res.status(201).json({
+      message: "Job created successfully",
+      job,
+    });
+  } catch (error) {
+    console.error("CREATE JOB ERROR:", error);
 
     res.status(500).json({
-      message: "Server Error",
-      error: err.message,
+      message: "Failed to create job",
+      error: error.message,
     });
   }
 };
 
-// ===============================
-// Get All Jobs
-// ===============================
+// =====================================
+// GET ALL JOBS
+// GET /api/jobs
+// =====================================
+
 const getJobs = async (req, res) => {
   try {
-    const {
-      search,
-      company,
-      location,
-      sort,
-      page = 1,
-    } = req.query;
+    const { search, company, location, sort } = req.query;
 
-    const limit = 5;
+    const query = {};
 
-    let query = {};
-
-    if (search) {
-      query.title = {
-        $regex: search,
-        $options: "i",
-      };
+    if (search && search.trim()) {
+      const searchRegex = { $regex: search.trim(), $options: "i" };
+      query.$or = [
+        { title: searchRegex },
+        { description: searchRegex },
+        { company: searchRegex },
+        { skills: { $in: [new RegExp(search.trim(), "i")] } },
+      ];
     }
 
-    if (company) {
-      query.company = {
-        $regex: company,
-        $options: "i",
-      };
+    if (company && company.trim()) {
+      query.company = { $regex: company.trim(), $options: "i" };
     }
 
-    if (location) {
-      query.location = {
-        $regex: location,
-        $options: "i",
-      };
+    if (location && location.trim()) {
+      query.location = { $regex: location.trim(), $options: "i" };
     }
 
-    let jobsQuery = Job.find(query).populate(
-      "postedBy",
-      "name email"
-    );
-
+    let sortOption = { createdAt: -1 };
     if (sort === "oldest") {
-      jobsQuery = jobsQuery.sort({
-        createdAt: 1,
-      });
-    } else {
-      jobsQuery = jobsQuery.sort({
-        createdAt: -1,
-      });
+      sortOption = { createdAt: 1 };
     }
 
-    const totalJobs = await Job.countDocuments(query);
+    const jobs = await Job.find(query)
+      .populate("postedBy", "name email")
+      .sort(sortOption);
 
-    const jobs = await jobsQuery
-      .skip((Number(page) - 1) * limit)
-      .limit(limit);
-
-    res.json({
-      jobs,
-      page: Number(page),
-      pages: Math.ceil(totalJobs / limit),
-      totalJobs,
-    });
-  } catch (err) {
-    console.error(err);
+    res.status(200).json(jobs);
+  } catch (error) {
+    console.error("GET JOBS ERROR:", error);
 
     res.status(500).json({
-      message: "Server Error",
-      error: err.message,
+      message: "Failed to fetch jobs",
+      error: error.message,
     });
   }
 };
 
-// ===============================
-// Get Job By ID
-// ===============================
+// =====================================
+// GET SINGLE JOB
+// GET /api/jobs/:id
+// =====================================
+
 const getJobById = async (req, res) => {
   try {
-    const job = await Job.findById(req.params.id).populate(
-      "postedBy",
-      "name email"
-    );
+    const job = await Job.findById(req.params.id)
+      .populate("postedBy", "name email");
 
     if (!job) {
       return res.status(404).json({
@@ -140,18 +118,46 @@ const getJobById = async (req, res) => {
       });
     }
 
-    res.json(job);
-  } catch (err) {
+    res.status(200).json(job);
+  } catch (error) {
+    console.error("GET JOB ERROR:", error);
+
     res.status(500).json({
-      message: "Server Error",
-      error: err.message,
+      message: "Failed to fetch job",
+      error: error.message,
     });
   }
 };
 
-// ===============================
-// Update Job
-// ===============================
+// =====================================
+// GET EMPLOYER'S JOBS
+// GET /api/jobs/my/jobs
+// =====================================
+
+const getMyJobs = async (req, res) => {
+  try {
+    const jobs = await Job.find({
+      postedBy: req.user._id,
+    }).sort({
+      createdAt: -1,
+    });
+
+    res.status(200).json(jobs);
+  } catch (error) {
+    console.error("GET MY JOBS ERROR:", error);
+
+    res.status(500).json({
+      message: "Failed to fetch your jobs",
+      error: error.message,
+    });
+  }
+};
+
+// =====================================
+// UPDATE JOB
+// PUT /api/jobs/:id
+// =====================================
+
 const updateJob = async (req, res) => {
   try {
     const job = await Job.findById(req.params.id);
@@ -162,28 +168,41 @@ const updateJob = async (req, res) => {
       });
     }
 
+    // Only the employer who posted the job can edit it
     if (job.postedBy.toString() !== req.user._id.toString()) {
       return res.status(403).json({
-        message: "Not authorized",
+        message: "You are not authorized to update this job",
       });
     }
 
-    Object.assign(job, req.body);
+    const updatedJob = await Job.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
 
-    await job.save();
+    res.status(200).json({
+      message: "Job updated successfully",
+      job: updatedJob,
+    });
+  } catch (error) {
+    console.error("UPDATE JOB ERROR:", error);
 
-    res.json(job);
-  } catch (err) {
     res.status(500).json({
-      message: "Server Error",
-      error: err.message,
+      message: "Failed to update job",
+      error: error.message,
     });
   }
 };
 
-// ===============================
-// Delete Job
-// ===============================
+// =====================================
+// DELETE JOB
+// DELETE /api/jobs/:id
+// =====================================
+
 const deleteJob = async (req, res) => {
   try {
     const job = await Job.findById(req.params.id);
@@ -194,66 +213,51 @@ const deleteJob = async (req, res) => {
       });
     }
 
+    // Only job owner can delete
     if (job.postedBy.toString() !== req.user._id.toString()) {
       return res.status(403).json({
-        message: "Not authorized",
+        message: "You are not authorized to delete this job",
       });
     }
 
-    await job.deleteOne();
+    // Delete applications related to this job
+    await Application.deleteMany({
+      job: req.params.id,
+    });
 
-    res.json({
+    // Delete job
+    await Job.findByIdAndDelete(req.params.id);
+
+    res.status(200).json({
       message: "Job deleted successfully",
     });
-  } catch (err) {
+  } catch (error) {
+    console.error("DELETE JOB ERROR:", error);
+
     res.status(500).json({
-      message: "Server Error",
-      error: err.message,
+      message: "Failed to delete job",
+      error: error.message,
     });
   }
 };
 
-// ===============================
-// My Jobs
-// ===============================
-const getMyJobs = async (req, res) => {
-  try {
-    console.log("=================================");
-    console.log("Logged in User ID:", req.user._id);
+// =====================================
+// EMPLOYER DASHBOARD STATISTICS
+// GET /api/jobs/stats
+// =====================================
 
-    const jobs = await Job.find({
-      postedBy: req.user._id,
-    }).sort({
-      createdAt: -1,
-    });
-
-    console.log("Jobs Found:", jobs.length);
-    console.log(jobs);
-    console.log("=================================");
-
-    res.status(200).json(jobs);
-  } catch (err) {
-    console.error("GET MY JOBS ERROR:");
-    console.error(err);
-
-    res.status(500).json({
-      message: "Server Error",
-      error: err.message,
-    });
-  }
-};
-
-// ===============================
-// Dashboard Statistics
-// ===============================
 const getDashboardStats = async (req, res) => {
   try {
+    const employerId = req.user._id;
+
+    // Get all jobs posted by employer
     const jobs = await Job.find({
-      postedBy: req.user._id,
+      postedBy: employerId,
     });
 
     const jobIds = jobs.map((job) => job._id);
 
+    // Get all applications for those jobs
     const applications = await Application.find({
       job: {
         $in: jobIds,
@@ -261,106 +265,111 @@ const getDashboardStats = async (req, res) => {
     });
 
     const totalJobs = jobs.length;
+
     const totalApplicants = applications.length;
 
     const accepted = applications.filter(
-      (app) => app.status === "Accepted"
+      (application) =>
+        application.status?.toLowerCase() === "accepted"
     ).length;
 
     const rejected = applications.filter(
-      (app) => app.status === "Rejected"
+      (application) =>
+        application.status?.toLowerCase() === "rejected"
     ).length;
 
     const pending = applications.filter(
-      (app) => app.status === "Pending"
+      (application) =>
+        application.status?.toLowerCase() === "pending"
     ).length;
 
-    res.json({
+    res.status(200).json({
       totalJobs,
       totalApplicants,
       accepted,
       rejected,
       pending,
     });
-  } catch (err) {
-    console.error("DASHBOARD ERROR:");
-    console.error(err);
+  } catch (error) {
+    console.error("DASHBOARD STATS ERROR:", error);
 
     res.status(500).json({
-      message: "Server Error",
-      error: err.message,
+      message: "Failed to fetch dashboard statistics",
+      error: error.message,
     });
   }
 };
-// ===============================
-// Recommended Jobs for Candidate
-// ===============================
+
+// =====================================
+// AI RECOMMENDED JOBS
+// GET /api/jobs/recommended
+// =====================================
+
 const getRecommendedJobs = async (req, res) => {
   try {
-    console.log("========== AI RECOMMENDATION ==========");
+    // Get all available jobs
+    const jobs = await Job.find()
+      .populate("postedBy", "name email")
+      .sort({ createdAt: -1 });
 
-    console.log("Logged In User ID:", req.user._id);
-
-    const user = await User.findById(req.user._id);
-
-    console.log("User Found:", user);
-
-    if (!user) {
-      return res.status(404).json({
-        message: "User not found",
-      });
+    // If no jobs exist
+    if (!jobs || jobs.length === 0) {
+      return res.status(200).json([]);
     }
 
-    const candidateSkills = user.skills
-      ? user.skills.split(",").map((skill) => skill.trim())
-      : [];
+    // Basic recommendation score
+    // AI recommendation can be improved later
+    const recommendations = jobs.map((job) => {
+      let score = 50;
 
-    console.log("Candidate Skills:", candidateSkills);
+      // Don't recommend jobs posted by the same user
+      if (
+        job.postedBy &&
+        job.postedBy._id &&
+        job.postedBy._id.toString() === req.user._id.toString()
+      ) {
+        score = 0;
+      }
 
-    const jobs = await Job.find().populate(
-      "postedBy",
-      "name email"
-    );
-
-    console.log("Jobs Count:", jobs.length);
-
-    jobs.forEach((job) => {
-      console.log(job.title, job.skills);
+      return {
+        ...job.toObject(),
+        score,
+      };
     });
 
-    const recommendations =
-      calculateJobRecommendations(
-        candidateSkills,
-        jobs
+    // Remove jobs with score 0
+    const filteredRecommendations =
+      recommendations.filter(
+        (job) => job.score > 0
       );
 
-    console.log(
-      "Recommendations:",
-      recommendations
+    // Highest score first
+    filteredRecommendations.sort(
+      (a, b) => b.score - a.score
     );
 
-    const filteredRecommendations = recommendations.filter(
-  (job) => job.score > 0
-);
-
-res.status(200).json(filteredRecommendations);
-  } catch (err) {
-    console.error("RECOMMENDATION ERROR:");
-    console.error(err);
+    res.status(200).json(filteredRecommendations);
+  } catch (error) {
+    console.error("RECOMMENDATION ERROR:", error);
 
     res.status(500).json({
-      message: "Server Error",
-      error: err.message,
+      message: "Failed to fetch recommended jobs",
+      error: error.message,
     });
   }
 };
+
+// =====================================
+// EXPORT CONTROLLERS
+// =====================================
+
 module.exports = {
   createJob,
   getJobs,
   getJobById,
+  getMyJobs,
   updateJob,
   deleteJob,
-  getMyJobs,
   getDashboardStats,
   getRecommendedJobs,
 };

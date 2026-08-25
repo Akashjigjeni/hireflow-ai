@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import API from "../api/axios";
+import Navbar from "../components/Navbar";
 
 const Apply = () => {
   const { jobId } = useParams();
@@ -47,377 +48,310 @@ const Apply = () => {
 
   return (
     <div style={styles.page}>
+      <Navbar />
 
-      {/* Background */}
-      <div style={styles.background}></div>
+      <div style={styles.container}>
+        <div style={styles.card}>
 
-      {/* Blur Overlay */}
-      <div style={styles.overlay}></div>
-
-      {/* Main Card */}
-      <div style={styles.card}>
-
-        {/* Header */}
-        <div style={styles.header}>
-          <div style={styles.icon}>
-            💼
-          </div>
-
-          <h1 style={styles.title}>
-            Apply for Job
-          </h1>
-
-          <p style={styles.subtitle}>
-            Take the next step toward your career
-          </p>
-        </div>
-
-        {/* Form */}
-        <form
-          onSubmit={submitApplication}
-          style={styles.form}
-        >
-
-          {/* Cover Letter */}
-          <div style={styles.field}>
-
-            <label style={styles.label}>
-              ✍️ Cover Letter
-            </label>
-
-            <textarea
-              value={coverLetter}
-              onChange={(e) =>
-                setCoverLetter(e.target.value)
-              }
-              placeholder="Write your cover letter here..."
-              required
-              rows="8"
-              style={styles.textarea}
-            />
-
-            <div style={styles.helper}>
-              Tell the employer why you are a good
-              fit for this position.
+          {/* Header */}
+          <div style={styles.header}>
+            <div style={styles.icon}>
+              💼
             </div>
 
+            <p style={styles.smallTitle}>
+              JOB APPLICATION
+            </p>
+
+            <h1 style={styles.title}>
+              Apply for Job
+            </h1>
+
+            <p style={styles.subtitle}>
+              Take the next step toward your career.
+            </p>
           </div>
 
-          {/* Resume */}
-          <div style={styles.field}>
+          {/* Form */}
+          <form
+            onSubmit={submitApplication}
+            style={styles.form}
+          >
 
-            <label style={styles.label}>
-              📄 Upload Resume
-            </label>
+            {/* Cover Letter */}
+            <div style={styles.field}>
+              <label style={styles.label}>
+                ✍️ Cover Letter
+              </label>
 
-            <label style={styles.uploadBox}>
-
-              <div style={styles.uploadIcon}>
-                📎
-              </div>
-
-              <div>
-                <strong style={styles.uploadTitle}>
-                  {resume
-                    ? resume.name
-                    : "Choose your resume"}
-                </strong>
-
-                <p style={styles.uploadText}>
-                  {resume
-                    ? `${(
-                        resume.size / 1024
-                      ).toFixed(1)} KB`
-                    : "PDF files only"}
-                </p>
-              </div>
-
-              <input
-                type="file"
-                accept=".pdf,application/pdf"
-                onChange={(e) => {
-                  const file =
-                    e.target.files[0];
-
-                  if (
-                    file &&
-                    file.type !==
-                      "application/pdf"
-                  ) {
-                    alert(
-                      "Please select a PDF file only."
-                    );
-
-                    e.target.value = "";
-                    return;
-                  }
-
-                  setResume(file);
-                }}
+              <textarea
+                value={coverLetter}
+                onChange={(e) =>
+                  setCoverLetter(e.target.value)
+                }
+                placeholder="Write your cover letter here..."
                 required
-                style={{
-                  display: "none",
-                }}
+                rows="8"
+                style={styles.textarea}
               />
 
-            </label>
-
-            <div style={styles.helper}>
-              Maximum recommended size: 5 MB
+              <div style={styles.helper}>
+                Tell the employer why you are a good fit
+                for this position.
+              </div>
             </div>
 
+            {/* Resume */}
+            <div style={styles.field}>
+              <label style={styles.label}>
+                📄 Upload Resume
+              </label>
+
+              <label style={styles.uploadBox}>
+                <div style={styles.uploadIcon}>
+                  📎
+                </div>
+
+                <div style={styles.uploadContent}>
+                  <strong style={styles.uploadTitle}>
+                    {resume
+                      ? resume.name
+                      : "Choose your resume"}
+                  </strong>
+
+                  <p style={styles.uploadText}>
+                    {resume
+                      ? `${(
+                          resume.size / 1024
+                        ).toFixed(1)} KB`
+                      : "PDF files only"}
+                  </p>
+                </div>
+
+                <div style={styles.chooseBadge}>
+                  Browse
+                </div>
+
+                <input
+                  type="file"
+                  accept=".pdf,application/pdf"
+                  onChange={(e) => {
+                    const file =
+                      e.target.files[0];
+
+                    if (
+                      file &&
+                      file.type !==
+                        "application/pdf"
+                    ) {
+                      alert(
+                        "Please select a PDF file only."
+                      );
+
+                      e.target.value = "";
+                      return;
+                    }
+
+                    setResume(file);
+                  }}
+                  required
+                  style={{
+                    display: "none",
+                  }}
+                />
+              </label>
+
+              <div style={styles.helper}>
+                Maximum recommended size: 5 MB
+              </div>
+            </div>
+
+            {/* Buttons */}
+            <div style={styles.buttonRow}>
+              <button
+                type="button"
+                onClick={() => navigate(-1)}
+                style={styles.cancelButton}
+                disabled={loading}
+              >
+                ← Back
+              </button>
+
+              <button
+                type="submit"
+                disabled={loading}
+                style={{
+                  ...styles.applyButton,
+                  opacity: loading ? 0.7 : 1,
+                  cursor: loading
+                    ? "not-allowed"
+                    : "pointer",
+                }}
+              >
+                {loading
+                  ? "⏳ Submitting..."
+                  : "🚀 Submit Application"}
+              </button>
+            </div>
+          </form>
+
+          {/* Security */}
+          <div style={styles.security}>
+            🔒 Your application information is secure
           </div>
 
-          {/* Buttons */}
-          <div style={styles.buttonRow}>
-
-            <button
-              type="button"
-              onClick={() => navigate(-1)}
-              style={styles.cancelButton}
-              disabled={loading}
-            >
-              ← Back
-            </button>
-
-            <button
-              type="submit"
-              disabled={loading}
-              style={{
-                ...styles.applyButton,
-                opacity: loading ? 0.7 : 1,
-              }}
-            >
-              {loading
-                ? "⏳ Submitting..."
-                : "🚀 Submit Application"}
-            </button>
-
-          </div>
-
-        </form>
-
-        {/* Security */}
-        <div style={styles.security}>
-          🔒 Your application information is secure
         </div>
-
       </div>
-
     </div>
   );
 };
 
 
 /* =====================================================
-   STYLES
+   DARK CHARCOAL + PURPLE THEME
 ===================================================== */
 
 const styles = {
 
   page: {
-    width: "100%",
-    height: "100vh",
     minHeight: "100vh",
-
-    position: "relative",
-
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-
-    overflow: "hidden",
-
+    background: "#24232A",
+    color: "#F5F3FF",
     fontFamily:
-      "'Segoe UI', Arial, sans-serif",
+      "system-ui, 'Segoe UI', Roboto, Arial, sans-serif",
   },
 
-
-  background: {
-    position: "absolute",
-    inset: 0,
-
-    backgroundImage:
-      "url('https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&w=2000&q=85')",
-
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-
-    filter: "blur(6px)",
-
-    transform: "scale(1.06)",
-
-    zIndex: 0,
+  container: {
+    width: "min(720px, calc(100% - 40px))",
+    margin: "0 auto",
+    padding: "45px 0 60px",
   },
-
-
-  overlay: {
-    position: "absolute",
-    inset: 0,
-
-    background:
-      "linear-gradient(135deg, rgba(15,23,42,0.86), rgba(30,64,175,0.68), rgba(76,29,149,0.65))",
-
-    backdropFilter: "blur(3px)",
-
-    zIndex: 1,
-  },
-
 
   card: {
-    width: "min(650px, calc(100% - 40px))",
-
-    maxHeight: "calc(100vh - 50px)",
-
-    overflowY: "auto",
-
-    boxSizing: "border-box",
-
-    padding: "35px 42px",
-
+    width: "100%",
+    padding: "38px",
     borderRadius: "22px",
-
-    background:
-      "rgba(255,255,255,0.96)",
-
+    background: "#302E36",
+    border: "1px solid #46414F",
     boxShadow:
-      "0 25px 70px rgba(0,0,0,0.4)",
-
-    position: "relative",
-
-    zIndex: 2,
+      "0 15px 45px rgba(0,0,0,0.25)",
   },
 
+  /* HEADER */
 
   header: {
     textAlign: "center",
-
-    marginBottom: "25px",
+    marginBottom: "30px",
   },
-
 
   icon: {
-    width: "58px",
-    height: "58px",
-
-    margin: "0 auto 12px",
-
-    borderRadius: "16px",
+    width: "65px",
+    height: "65px",
+    margin: "0 auto 15px",
+    borderRadius: "18px",
 
     background:
-      "linear-gradient(135deg,#2563eb,#7c3aed)",
+      "linear-gradient(135deg, #8B5CF6, #A855F7)",
 
     display: "flex",
-
     alignItems: "center",
-
     justifyContent: "center",
-
-    fontSize: "27px",
-
-    boxShadow:
-      "0 10px 25px rgba(37,99,235,0.25)",
-  },
-
-
-  title: {
-    margin: 0,
 
     fontSize: "30px",
 
-    fontWeight: "800",
-
-    color: "#172554",
+    boxShadow:
+      "0 8px 22px rgba(139,92,246,0.25)",
   },
 
+  smallTitle: {
+    margin: "0 0 5px",
+    color: "#A78BFA",
+    fontSize: "12px",
+    fontWeight: "800",
+    letterSpacing: "1px",
+  },
+
+  title: {
+    margin: 0,
+    fontSize: "32px",
+    fontWeight: "800",
+    color: "#F5F3FF",
+  },
 
   subtitle: {
-    margin:
-      "7px 0 0",
-
-    color: "#64748b",
-
+    margin: "8px 0 0",
+    color: "#A9A6B8",
     fontSize: "14px",
   },
 
+
+  /* FORM */
 
   form: {
     width: "100%",
   },
 
-
   field: {
-    marginBottom: "20px",
+    marginBottom: "23px",
   },
-
 
   label: {
     display: "block",
-
-    marginBottom: "8px",
-
-    color: "#1e293b",
-
+    marginBottom: "9px",
+    color: "#C4B5FD",
     fontSize: "14px",
-
     fontWeight: "700",
   },
 
-
   textarea: {
     width: "100%",
-
     boxSizing: "border-box",
-
     resize: "vertical",
+    minHeight: "160px",
 
-    minHeight: "150px",
+    padding: "15px",
 
-    padding: "14px",
-
-    borderRadius: "11px",
+    borderRadius: "12px",
 
     border:
-      "1px solid #d7deeb",
+      "1px solid #46414F",
 
     outline: "none",
 
-    background: "#f8fafc",
+    background: "#3A3842",
 
-    color: "#1e293b",
+    color: "#F5F3FF",
 
     fontSize: "14px",
 
     lineHeight: "1.6",
 
     fontFamily:
-      "'Segoe UI', Arial, sans-serif",
+      "system-ui, 'Segoe UI', Roboto, Arial, sans-serif",
   },
 
-
   helper: {
-    marginTop: "6px",
-
-    color: "#64748b",
-
+    marginTop: "7px",
+    color: "#777383",
     fontSize: "11px",
   },
 
 
-  uploadBox: {
-    minHeight: "85px",
+  /* UPLOAD */
 
-    padding: "15px",
+  uploadBox: {
+    minHeight: "90px",
+
+    padding: "16px",
 
     boxSizing: "border-box",
 
-    borderRadius: "12px",
+    borderRadius: "13px",
 
     border:
-      "2px dashed #93c5fd",
+      "2px dashed #6D4BC4",
 
-    background:
-      "linear-gradient(135deg,#eff6ff,#f5f3ff)",
+    background: "#3A3842",
 
     display: "flex",
 
@@ -427,18 +361,16 @@ const styles = {
 
     cursor: "pointer",
 
-    transition:
-      "0.2s ease",
+    transition: "0.2s ease",
   },
 
-
   uploadIcon: {
-    width: "48px",
-    height: "48px",
+    width: "50px",
+    height: "50px",
 
-    borderRadius: "12px",
+    borderRadius: "13px",
 
-    background: "#dbeafe",
+    background: "#3A2E52",
 
     display: "flex",
 
@@ -446,20 +378,22 @@ const styles = {
 
     justifyContent: "center",
 
-    fontSize: "22px",
+    fontSize: "23px",
 
     flexShrink: 0,
   },
 
+  uploadContent: {
+    flex: 1,
+    minWidth: 0,
+  },
 
   uploadTitle: {
     display: "block",
 
-    color: "#1e3a8a",
+    color: "#F5F3FF",
 
     fontSize: "13px",
-
-    maxWidth: "430px",
 
     overflow: "hidden",
 
@@ -468,37 +402,53 @@ const styles = {
     whiteSpace: "nowrap",
   },
 
-
   uploadText: {
-    margin: "4px 0 0",
+    margin: "5px 0 0",
 
-    color: "#64748b",
+    color: "#A9A6B8",
 
     fontSize: "11px",
   },
 
+  chooseBadge: {
+    padding: "8px 13px",
+
+    borderRadius: "8px",
+
+    background: "#3A2E52",
+
+    border: "1px solid #6D4BC4",
+
+    color: "#C4B5FD",
+
+    fontSize: "11px",
+
+    fontWeight: "700",
+  },
+
+
+  /* BUTTONS */
 
   buttonRow: {
     display: "flex",
 
     gap: "12px",
 
-    marginTop: "8px",
+    marginTop: "10px",
   },
 
-
   cancelButton: {
-    flex: "0 0 110px",
+    flex: "0 0 115px",
 
-    height: "46px",
+    height: "48px",
 
-    border: "1px solid #cbd5e1",
+    border: "1px solid #46414F",
 
-    borderRadius: "9px",
+    borderRadius: "10px",
 
-    background: "#f8fafc",
+    background: "#3A3842",
 
-    color: "#475569",
+    color: "#A9A6B8",
 
     fontSize: "13px",
 
@@ -507,42 +457,45 @@ const styles = {
     cursor: "pointer",
   },
 
-
   applyButton: {
     flex: 1,
 
-    height: "46px",
+    height: "48px",
 
     border: "none",
 
-    borderRadius: "9px",
+    borderRadius: "10px",
 
     background:
-      "linear-gradient(135deg,#2563eb,#7c3aed)",
+      "linear-gradient(135deg, #8B5CF6, #A855F7)",
 
-    color: "white",
+    color: "#FFFFFF",
 
     fontSize: "14px",
 
     fontWeight: "700",
 
-    cursor: "pointer",
-
     boxShadow:
-      "0 8px 20px rgba(37,99,235,0.25)",
+      "0 8px 20px rgba(139,92,246,0.25)",
   },
 
+
+  /* SECURITY */
 
   security: {
     textAlign: "center",
 
-    marginTop: "18px",
+    marginTop: "22px",
 
-    color: "#64748b",
+    paddingTop: "18px",
 
-    fontSize: "10px",
+    borderTop:
+      "1px solid #46414F",
+
+    color: "#777383",
+
+    fontSize: "11px",
   },
 };
-
 
 export default Apply;

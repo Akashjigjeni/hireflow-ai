@@ -1,1413 +1,695 @@
-import { useState, useEffect } from "react";
-import Navbar from "../components/Navbar";
+import { useEffect, useState } from "react";
 import API from "../api/axios";
+import Navbar from "../components/Navbar";
 
 function Profile() {
   const [user, setUser] = useState({
     name: "",
     email: "",
-    phone: "",
-    location: "",
-    education: "",
-    skills: "",
-    profileImage: "",
-    resume: "",
+    role: "",
   });
 
+  const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
-  const [profileImage, setProfileImage] = useState(null);
-  const [resume, setResume] = useState(null);
-  const [saving, setSaving] = useState(false);
+
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+  });
+
+  const fetchProfile = async () => {
+    try {
+      setLoading(true);
+
+      const res = await API.get("/users/profile");
+
+      setUser(res.data);
+
+      setFormData({
+        name: res.data.name || "",
+        email: res.data.email || "",
+      });
+    } catch (error) {
+      console.error(error);
+
+      const localUser = JSON.parse(
+        localStorage.getItem("user")
+      );
+
+      if (localUser) {
+        setUser(localUser);
+
+        setFormData({
+          name: localUser.name || "",
+          email: localUser.email || "",
+        });
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     fetchProfile();
   }, []);
 
-  const fetchProfile = async () => {
-    try {
-      const res = await API.get("/users/profile");
-      setUser(res.data);
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
   const handleChange = (e) => {
-    setUser({
-      ...user,
+    setFormData({
+      ...formData,
       [e.target.name]: e.target.value,
     });
   };
 
-  const handleSubmit = async (e) => {
+  const handleSave = async (e) => {
     e.preventDefault();
 
     try {
-      setSaving(true);
+      const res = await API.put(
+        "/auth/profile",
+        formData
+      );
 
-      const formData = new FormData();
+      const updatedUser = res.data.user || res.data;
 
-      formData.append("name", user.name);
-      formData.append("phone", user.phone);
-      formData.append("location", user.location);
-      formData.append("education", user.education);
-      formData.append("skills", user.skills);
+      setUser(updatedUser);
 
-      if (profileImage) {
-        formData.append("profileImage", profileImage);
-      }
+      localStorage.setItem(
+        "user",
+        JSON.stringify(updatedUser)
+      );
 
-      if (resume) {
-        formData.append("resume", resume);
-      }
-
-      await API.put("/users/profile", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-
-      alert("Profile Updated Successfully ✅");
-
-      setProfileImage(null);
-      setResume(null);
       setEditing(false);
 
-      fetchProfile();
-    } catch (err) {
-      console.error(err);
+      alert("Profile updated successfully!");
+    } catch (error) {
+      console.error(error);
 
       alert(
-        err.response?.data?.message ||
-        "Failed to update profile"
+        error.response?.data?.message ||
+          "Failed to update profile"
       );
-    } finally {
-      setSaving(false);
     }
   };
 
-  const cancelEdit = () => {
-    setEditing(false);
-    setProfileImage(null);
-    setResume(null);
-    fetchProfile();
-  };
+  if (loading) {
+    return (
+      <div style={styles.page}>
+        <Navbar />
 
-  const avatarUrl = user.profileImage
-    ? `http://localhost:5000/${user.profileImage}`
-    : `https://ui-avatars.com/api/?name=${encodeURIComponent(
-      user.name || "User"
-    )}&background=2563eb&color=fff&size=200`;
+        <div style={styles.loading}>
+          <div style={styles.loadingIcon}>👤</div>
+
+          <h2 style={styles.loadingTitle}>
+            Loading Profile...
+          </h2>
+
+          <p style={styles.loadingText}>
+            Please wait a moment
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  const initial =
+    user?.name?.charAt(0)?.toUpperCase() || "U";
 
   return (
-    <div className="profile-page">
+    <div style={styles.page}>
       <Navbar />
 
-      <main className="profile-container">
+      <main style={styles.container}>
 
-        {/* =========================
-            PROFILE HERO
-        ========================= */}
-
-        <section className="profile-hero">
-
-          <div className="hero-content">
-
-            <div className="profile-avatar-wrapper">
-
-              <img
-                src={avatarUrl}
-                alt="Profile"
-                className="profile-avatar"
-              />
-
-              {editing && (
-                <label
-                  htmlFor="profileImage"
-                  className="camera-button"
-                  title="Change profile photo"
-                >
-                  📷
-                </label>
-              )}
-
-            </div>
-
-
-            <div className="profile-heading">
-
-              <span className="profile-badge">
-                👤 Candidate Profile
-              </span>
-
-              <h1>
-                {user.name || "Your Profile"}
-              </h1>
-
-              <p>
-                {user.email ||
-                  "Complete your profile to improve your opportunities."}
-              </p>
-
-            </div>
-
+        {/* HEADER */}
+        <section style={styles.header}>
+          <div style={styles.avatar}>
+            {initial}
           </div>
 
+          <div style={styles.headerInfo}>
+            <p style={styles.welcomeText}>
+              ACCOUNT PROFILE
+            </p>
 
-          {!editing && (
-            <button
-              onClick={() => setEditing(true)}
-              className="hero-edit-button"
-            >
-              ✏️ Edit Profile
-            </button>
-          )}
+            <h1 style={styles.title}>
+              {user?.name || "User"}
+            </h1>
 
+            <p style={styles.subtitle}>
+              Manage your personal information and account details.
+            </p>
+          </div>
+
+          <div style={styles.roleBadge}>
+            {user?.role === "employer"
+              ? "💼 Employer"
+              : "👤 Candidate"}
+          </div>
         </section>
 
 
-        {/* =========================
-            PROFILE CONTENT
-        ========================= */}
+        {/* PROFILE CARD */}
+        <section style={styles.profileCard}>
 
-        <section className="profile-card">
-
-          <div className="card-header">
-
+          <div style={styles.cardHeader}>
             <div>
-              <h2>Personal Information</h2>
+              <h2 style={styles.cardTitle}>
+                Personal Information
+              </h2>
 
-              <p>
-                Keep your information up to date.
+              <p style={styles.cardSubtitle}>
+                Update your account details here.
               </p>
             </div>
 
             {!editing && (
-              <span className="verified-badge">
-                ✓ Profile
-              </span>
+              <button
+                style={styles.editButton}
+                onClick={() => setEditing(true)}
+              >
+                ✏️ Edit Profile
+              </button>
             )}
-
           </div>
 
 
-          <form onSubmit={handleSubmit}>
+          {!editing ? (
 
-            <div className="form-grid">
+            <div style={styles.infoGrid}>
 
-              {/* NAME */}
+              <div style={styles.infoBox}>
+                <div style={styles.infoIcon}>
+                  👤
+                </div>
 
-              <div className="field">
+                <div>
+                  <p style={styles.infoLabel}>
+                    Full Name
+                  </p>
 
-                <label>
+                  <p style={styles.infoValue}>
+                    {user?.name || "Not provided"}
+                  </p>
+                </div>
+              </div>
+
+
+              <div style={styles.infoBox}>
+                <div style={styles.infoIcon}>
+                  ✉️
+                </div>
+
+                <div>
+                  <p style={styles.infoLabel}>
+                    Email Address
+                  </p>
+
+                  <p style={styles.infoValue}>
+                    {user?.email || "Not provided"}
+                  </p>
+                </div>
+              </div>
+
+
+              <div style={styles.infoBox}>
+                <div style={styles.infoIcon}>
+                  💼
+                </div>
+
+                <div>
+                  <p style={styles.infoLabel}>
+                    Account Type
+                  </p>
+
+                  <p style={styles.infoValue}>
+                    {user?.role === "employer"
+                      ? "Employer"
+                      : "Candidate"}
+                  </p>
+                </div>
+              </div>
+
+            </div>
+
+          ) : (
+
+            <form
+              onSubmit={handleSave}
+              style={styles.form}
+            >
+
+              <div style={styles.inputGroup}>
+                <label style={styles.label}>
                   Full Name
                 </label>
 
-                <div className="input-wrapper">
-
-                  <span>👤</span>
-
-                  <input
-                    type="text"
-                    name="name"
-                    value={user.name || ""}
-                    onChange={handleChange}
-                    disabled={!editing}
-                    placeholder="Enter your full name"
-                  />
-
-                </div>
-
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  placeholder="Enter your name"
+                  style={styles.input}
+                  required
+                />
               </div>
 
 
-              {/* EMAIL */}
-
-              <div className="field">
-
-                <label>
+              <div style={styles.inputGroup}>
+                <label style={styles.label}>
                   Email Address
                 </label>
 
-                <div className="input-wrapper disabled-input">
-
-                  <span>✉️</span>
-
-                  <input
-                    type="email"
-                    value={user.email || ""}
-                    disabled
-                    placeholder="Your email"
-                  />
-
-                  <small>
-                    🔒
-                  </small>
-
-                </div>
-
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  placeholder="Enter your email"
+                  style={styles.input}
+                  required
+                />
               </div>
 
 
-              {/* PHONE */}
-
-              <div className="field">
-
-                <label>
-                  Phone Number
-                </label>
-
-                <div className="input-wrapper">
-
-                  <span>📱</span>
-
-                  <input
-                    type="text"
-                    name="phone"
-                    value={user.phone || ""}
-                    onChange={handleChange}
-                    disabled={!editing}
-                    placeholder="Enter phone number"
-                  />
-
-                </div>
-
-              </div>
-
-
-              {/* LOCATION */}
-
-              <div className="field">
-
-                <label>
-                  Location
-                </label>
-
-                <div className="input-wrapper">
-
-                  <span>📍</span>
-
-                  <input
-                    type="text"
-                    name="location"
-                    value={user.location || ""}
-                    onChange={handleChange}
-                    disabled={!editing}
-                    placeholder="City, State"
-                  />
-
-                </div>
-
-              </div>
-
-
-              {/* EDUCATION */}
-
-              <div className="field full-width">
-
-                <label>
-                  Education
-                </label>
-
-                <div className="input-wrapper">
-
-                  <span>🎓</span>
-
-                  <input
-                    type="text"
-                    name="education"
-                    value={user.education || ""}
-                    onChange={handleChange}
-                    disabled={!editing}
-                    placeholder="B.E. Computer Engineering"
-                  />
-
-                </div>
-
-              </div>
-
-
-              {/* SKILLS */}
-
-              <div className="field full-width">
-
-                <label>
-                  Skills
-                </label>
-
-                <div className="textarea-wrapper">
-
-                  <textarea
-                    rows="4"
-                    name="skills"
-                    value={user.skills || ""}
-                    onChange={handleChange}
-                    disabled={!editing}
-                    placeholder="React, Node.js, MongoDB, JavaScript..."
-                  />
-
-                </div>
-
-                {editing && (
-                  <small className="field-hint">
-                    💡 Separate multiple skills with commas.
-                  </small>
-                )}
-
-              </div>
-
-            </div>
-
-
-            {/* =========================
-                DOCUMENTS
-            ========================= */}
-
-            <div className="documents-section">
-
-              <div className="section-title">
-
-                <div>
-                  <h2>
-                    Documents
-                  </h2>
-
-                  <p>
-                    Manage your profile photo and resume.
-                  </p>
-                </div>
-
-              </div>
-
-
-              <div className="document-grid">
-
-                {/* PROFILE IMAGE */}
-
-                <div className="document-card">
-
-                  <div className="document-icon">
-                    🖼️
-                  </div>
-
-                  <div className="document-info">
-
-                    <strong>
-                      Profile Photo
-                    </strong>
-
-                    <span>
-                      JPG, PNG or WEBP
-                    </span>
-
-                  </div>
-
-                  {editing && (
-                    <label
-                      htmlFor="profileImage"
-                      className="upload-button"
-                    >
-                      Choose
-                    </label>
-                  )}
-
-                  <input
-                    id="profileImage"
-                    type="file"
-                    accept="image/*"
-                    disabled={!editing}
-                    onChange={(e) =>
-                      setProfileImage(
-                        e.target.files[0]
-                      )
-                    }
-                    hidden
-                  />
-
-                </div>
-
-
-                {/* RESUME */}
-
-                <div className="document-card">
-
-                  <div className="document-icon resume-icon">
-                    📄
-                  </div>
-
-                  <div className="document-info">
-
-                    <strong>
-                      Resume
-                    </strong>
-
-                    <span>
-                      PDF format only
-                    </span>
-
-                  </div>
-
-                  {editing && (
-                    <label
-                      htmlFor="resume"
-                      className="upload-button"
-                    >
-                      Choose
-                    </label>
-                  )}
-
-                  <input
-                    id="resume"
-                    type="file"
-                    accept=".pdf"
-                    disabled={!editing}
-                    onChange={(e) =>
-                      setResume(
-                        e.target.files[0]
-                      )
-                    }
-                    hidden
-                  />
-
-                </div>
-
-              </div>
-
-
-              {/* SELECTED FILES */}
-
-              {profileImage && (
-                <div className="selected-file">
-                  🖼️ Selected photo:
-                  <strong>
-                    {" "}
-                    {profileImage.name}
-                  </strong>
-                </div>
-              )}
-
-              {resume && (
-                <div className="selected-file">
-                  📄 Selected resume:
-                  <strong>
-                    {" "}
-                    {resume.name}
-                  </strong>
-                </div>
-              )}
-
-
-              {/* EXISTING RESUME */}
-
-              {user.resume && (
-                <a
-                  href={`http://localhost:5000/${user.resume}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="resume-link"
-                >
-                  📄 View Current Resume
-                  <span>↗</span>
-                </a>
-              )}
-
-            </div>
-
-
-            {/* =========================
-                ACTION BUTTONS
-            ========================= */}
-
-            {editing && (
-              <div className="form-actions">
-
+              <div style={styles.formActions}>
                 <button
                   type="button"
-                  onClick={cancelEdit}
-                  className="cancel-button"
-                  disabled={saving}
+                  style={styles.cancelButton}
+                  onClick={() => {
+                    setEditing(false);
+
+                    setFormData({
+                      name: user?.name || "",
+                      email: user?.email || "",
+                    });
+                  }}
                 >
                   Cancel
                 </button>
 
                 <button
                   type="submit"
-                  className="save-button"
-                  disabled={saving}
+                  style={styles.saveButton}
                 >
-                  {saving
-                    ? "⏳ Saving..."
-                    : "💾 Save Changes"}
+                  ✓ Save Changes
                 </button>
-
               </div>
-            )}
 
-          </form>
+            </form>
+
+          )}
 
         </section>
 
 
-        {/* =========================
-            PROFILE TIP
-        ========================= */}
+        {/* ACCOUNT SUMMARY */}
+        <section style={styles.summarySection}>
 
-        <div className="profile-tip">
+          <h2 style={styles.summaryTitle}>
+            Account Summary
+          </h2>
 
-          <div className="tip-icon">
-            ✨
+          <div style={styles.summaryGrid}>
+
+            <div style={styles.summaryCard}>
+              <span style={styles.summaryIcon}>
+                🛡️
+              </span>
+
+              <div>
+                <strong style={styles.summaryValue}>
+                  Active
+                </strong>
+
+                <span style={styles.summaryLabel}>
+                  Account Status
+                </span>
+              </div>
+            </div>
+
+
+            <div style={styles.summaryCard}>
+              <span style={styles.summaryIcon}>
+                {user?.role === "employer"
+                  ? "💼"
+                  : "🎯"}
+              </span>
+
+              <div>
+                <strong style={styles.summaryValue}>
+                  {user?.role === "employer"
+                    ? "Employer"
+                    : "Candidate"}
+                </strong>
+
+                <span style={styles.summaryLabel}>
+                  Account Role
+                </span>
+              </div>
+            </div>
+
           </div>
 
-          <div>
-
-            <strong>
-              Complete your profile
-            </strong>
-
-            <p>
-              A complete profile helps employers
-              understand your skills and experience
-              faster.
-            </p>
-
-          </div>
-
-        </div>
+        </section>
 
       </main>
-
-
-      {/* =========================
-          PAGE CSS
-      ========================= */}
-
-      <style>{`
-
-        * {
-          box-sizing: border-box;
-        }
-
-        .profile-page {
-          min-height: 100vh;
-
-          background:
-            linear-gradient(
-              135deg,
-              #f5f7ff 0%,
-              #eef4ff 50%,
-              #f8f5ff 100%
-            );
-
-          font-family:
-            "Segoe UI",
-            Arial,
-            sans-serif;
-
-          color: #172554;
-
-          padding-bottom: 60px;
-        }
-
-
-        .profile-container {
-          width:
-            min(
-              1050px,
-              calc(100% - 40px)
-            );
-
-          margin: 0 auto;
-
-          padding-top: 35px;
-        }
-
-
-        /* =========================
-           HERO
-        ========================= */
-
-        .profile-hero {
-          display: flex;
-
-          align-items: center;
-
-          justify-content: space-between;
-
-          gap: 25px;
-
-          padding: 28px 32px;
-
-          border-radius: 22px;
-
-          background:
-            linear-gradient(
-              135deg,
-              #172554,
-              #2563eb 55%,
-              #7c3aed
-            );
-
-          color: white;
-
-          box-shadow:
-            0 15px 40px
-            rgba(37,99,235,.22);
-
-          margin-bottom: 25px;
-        }
-
-
-        .hero-content {
-          display: flex;
-
-          align-items: center;
-
-          gap: 22px;
-        }
-
-
-        .profile-avatar-wrapper {
-          position: relative;
-
-          flex-shrink: 0;
-        }
-
-
-        .profile-avatar {
-          width: 115px;
-
-          height: 115px;
-
-          border-radius: 50%;
-
-          object-fit: cover;
-
-          border:
-            4px solid
-            rgba(255,255,255,.9);
-
-          box-shadow:
-            0 8px 25px
-            rgba(0,0,0,.22);
-        }
-
-
-        .camera-button {
-          position: absolute;
-
-          right: 3px;
-
-          bottom: 5px;
-
-          width: 35px;
-
-          height: 35px;
-
-          display: flex;
-
-          align-items: center;
-
-          justify-content: center;
-
-          border-radius: 50%;
-
-          background: white;
-
-          color: #2563eb;
-
-          cursor: pointer;
-
-          box-shadow:
-            0 4px 12px
-            rgba(0,0,0,.2);
-
-          font-size: 15px;
-        }
-
-
-        .profile-badge {
-          display: inline-block;
-
-          padding: 6px 11px;
-
-          border-radius: 20px;
-
-          background:
-            rgba(255,255,255,.14);
-
-          border:
-            1px solid
-            rgba(255,255,255,.18);
-
-          font-size: 11px;
-
-          font-weight: 700;
-
-          margin-bottom: 9px;
-        }
-
-
-        .profile-heading h1 {
-          margin: 0;
-
-          font-size: 31px;
-
-          font-weight: 800;
-        }
-
-
-        .profile-heading p {
-          margin: 6px 0 0;
-
-          color:
-            rgba(255,255,255,.78);
-
-          font-size: 13px;
-        }
-
-
-        .hero-edit-button {
-          border: 1px solid
-            rgba(255,255,255,.3);
-
-          background:
-            rgba(255,255,255,.12);
-
-          color: white;
-
-          padding: 11px 17px;
-
-          border-radius: 9px;
-
-          font-weight: 700;
-
-          cursor: pointer;
-
-          transition: .2s;
-        }
-
-
-        .hero-edit-button:hover {
-          background:
-            rgba(255,255,255,.22);
-
-          transform:
-            translateY(-1px);
-        }
-
-
-        /* =========================
-           CARD
-        ========================= */
-
-        .profile-card {
-          background: white;
-
-          border:
-            1px solid #e2e8f0;
-
-          border-radius: 20px;
-
-          padding: 30px;
-
-          box-shadow:
-            0 10px 30px
-            rgba(15,23,42,.07);
-        }
-
-
-        .card-header {
-          display: flex;
-
-          justify-content: space-between;
-
-          align-items: flex-start;
-
-          padding-bottom: 20px;
-
-          margin-bottom: 25px;
-
-          border-bottom:
-            1px solid #e2e8f0;
-        }
-
-
-        .card-header h2,
-        .section-title h2 {
-          margin: 0;
-
-          color: #172554;
-
-          font-size: 20px;
-        }
-
-
-        .card-header p,
-        .section-title p {
-          margin: 5px 0 0;
-
-          color: #64748b;
-
-          font-size: 13px;
-        }
-
-
-        .verified-badge {
-          padding: 7px 11px;
-
-          border-radius: 20px;
-
-          background: #ecfdf5;
-
-          color: #15803d;
-
-          font-size: 11px;
-
-          font-weight: 700;
-        }
-
-
-        /* =========================
-           FORM
-        ========================= */
-
-        .form-grid {
-          display: grid;
-
-          grid-template-columns:
-            1fr 1fr;
-
-          gap: 22px;
-        }
-
-
-        .field {
-          display: flex;
-
-          flex-direction: column;
-        }
-
-
-        .full-width {
-          grid-column: 1 / -1;
-        }
-
-
-        .field label {
-          margin-bottom: 8px;
-
-          color: #334155;
-
-          font-size: 12px;
-
-          font-weight: 700;
-        }
-
-
-        .input-wrapper {
-          display: flex;
-
-          align-items: center;
-
-          gap: 10px;
-
-          height: 47px;
-
-          padding: 0 13px;
-
-          border:
-            1px solid #dbe3ef;
-
-          border-radius: 10px;
-
-          background: #f8fafc;
-
-          transition: .2s;
-        }
-
-
-        .input-wrapper:focus-within {
-          border-color: #2563eb;
-
-          background: white;
-
-          box-shadow:
-            0 0 0 3px
-            rgba(37,99,235,.09);
-        }
-
-
-        .input-wrapper input {
-          width: 100%;
-
-          height: 100%;
-
-          border: none;
-
-          outline: none;
-
-          background: transparent;
-
-          color: #172554;
-
-          font-size: 13px;
-        }
-
-
-        .input-wrapper input:disabled {
-          color: #64748b;
-
-          cursor: not-allowed;
-        }
-
-
-        .disabled-input {
-          background: #f1f5f9;
-        }
-
-
-        .disabled-input small {
-          color: #94a3b8;
-        }
-
-
-        .textarea-wrapper {
-          border:
-            1px solid #dbe3ef;
-
-          border-radius: 10px;
-
-          background: #f8fafc;
-
-          padding: 10px 13px;
-
-          transition: .2s;
-        }
-
-
-        .textarea-wrapper:focus-within {
-          border-color: #2563eb;
-
-          background: white;
-
-          box-shadow:
-            0 0 0 3px
-            rgba(37,99,235,.09);
-        }
-
-
-        .textarea-wrapper textarea {
-          width: 100%;
-
-          border: none;
-
-          outline: none;
-
-          resize: vertical;
-
-          background: transparent;
-
-          font-family:
-            "Segoe UI",
-            Arial,
-            sans-serif;
-
-          color: #172554;
-
-          font-size: 13px;
-
-          line-height: 1.6;
-        }
-
-
-        .textarea-wrapper textarea:disabled {
-          color: #64748b;
-
-          cursor: not-allowed;
-        }
-
-
-        .field-hint {
-          margin-top: 6px;
-
-          color: #64748b;
-
-          font-size: 11px;
-        }
-
-
-        /* =========================
-           DOCUMENTS
-        ========================= */
-
-        .documents-section {
-          margin-top: 35px;
-
-          padding-top: 28px;
-
-          border-top:
-            1px solid #e2e8f0;
-        }
-
-
-        .section-title {
-          margin-bottom: 18px;
-        }
-
-
-        .document-grid {
-          display: grid;
-
-          grid-template-columns:
-            1fr 1fr;
-
-          gap: 15px;
-        }
-
-
-        .document-card {
-          display: flex;
-
-          align-items: center;
-
-          gap: 13px;
-
-          padding: 15px;
-
-          border:
-            1px solid #e2e8f0;
-
-          border-radius: 12px;
-
-          background: #f8fafc;
-        }
-
-
-        .document-icon {
-          width: 43px;
-
-          height: 43px;
-
-          display: flex;
-
-          align-items: center;
-
-          justify-content: center;
-
-          border-radius: 10px;
-
-          background: #eff6ff;
-
-          font-size: 20px;
-
-          flex-shrink: 0;
-        }
-
-
-        .resume-icon {
-          background: #fff7ed;
-        }
-
-
-        .document-info {
-          display: flex;
-
-          flex-direction: column;
-
-          flex: 1;
-
-          gap: 3px;
-        }
-
-
-        .document-info strong {
-          color: #172554;
-
-          font-size: 13px;
-        }
-
-
-        .document-info span {
-          color: #64748b;
-
-          font-size: 10px;
-        }
-
-
-        .upload-button {
-          padding: 8px 12px;
-
-          border-radius: 7px;
-
-          background: #2563eb;
-
-          color: white;
-
-          font-size: 11px;
-
-          font-weight: 700;
-
-          cursor: pointer;
-        }
-
-
-        .selected-file {
-          margin-top: 10px;
-
-          padding: 10px 12px;
-
-          border-radius: 8px;
-
-          background: #eff6ff;
-
-          color: #1d4ed8;
-
-          font-size: 11px;
-        }
-
-
-        .resume-link {
-          display: inline-flex;
-
-          align-items: center;
-
-          gap: 8px;
-
-          margin-top: 14px;
-
-          color: #2563eb;
-
-          font-size: 13px;
-
-          font-weight: 700;
-
-          text-decoration: none;
-        }
-
-
-        .resume-link:hover {
-          text-decoration: underline;
-        }
-
-
-        /* =========================
-           ACTIONS
-        ========================= */
-
-        .form-actions {
-          display: flex;
-
-          justify-content: flex-end;
-
-          gap: 12px;
-
-          margin-top: 30px;
-
-          padding-top: 22px;
-
-          border-top:
-            1px solid #e2e8f0;
-        }
-
-
-        .form-actions button {
-          min-width: 140px;
-
-          padding: 12px 18px;
-
-          border-radius: 9px;
-
-          font-size: 13px;
-
-          font-weight: 700;
-
-          cursor: pointer;
-
-          transition: .2s;
-        }
-
-
-        .cancel-button {
-          border:
-            1px solid #cbd5e1;
-
-          background: white;
-
-          color: #475569;
-        }
-
-
-        .cancel-button:hover {
-          background: #f8fafc;
-        }
-
-
-        .save-button {
-          border: none;
-
-          color: white;
-
-          background:
-            linear-gradient(
-              135deg,
-              #2563eb,
-              #7c3aed
-            );
-
-          box-shadow:
-            0 7px 18px
-            rgba(37,99,235,.20);
-        }
-
-
-        .save-button:hover {
-          transform:
-            translateY(-1px);
-
-          box-shadow:
-            0 10px 22px
-            rgba(37,99,235,.25);
-        }
-
-
-        /* =========================
-           TIP
-        ========================= */
-
-        .profile-tip {
-          display: flex;
-
-          align-items: center;
-
-          gap: 14px;
-
-          margin-top: 20px;
-
-          padding: 17px 20px;
-
-          border-radius: 14px;
-
-          background:
-            linear-gradient(
-              135deg,
-              #eef4ff,
-              #f5f3ff
-            );
-
-          border:
-            1px solid #dbeafe;
-        }
-
-
-        .tip-icon {
-          width: 40px;
-
-          height: 40px;
-
-          display: flex;
-
-          align-items: center;
-
-          justify-content: center;
-
-          border-radius: 10px;
-
-          background: white;
-
-          font-size: 19px;
-        }
-
-
-        .profile-tip strong {
-          font-size: 13px;
-
-          color: #172554;
-        }
-
-
-        .profile-tip p {
-          margin: 3px 0 0;
-
-          color: #64748b;
-
-          font-size: 11px;
-        }
-
-
-        /* =========================
-           RESPONSIVE
-        ========================= */
-
-        @media (max-width: 700px) {
-
-          .profile-container {
-            width:
-              calc(100% - 24px);
-
-            padding-top: 20px;
-          }
-
-
-          .profile-hero {
-            flex-direction: column;
-
-            align-items: flex-start;
-
-            padding: 22px;
-          }
-
-
-          .hero-content {
-            flex-direction: column;
-
-            align-items: flex-start;
-          }
-
-
-          .profile-heading h1 {
-            font-size: 25px;
-          }
-
-
-          .hero-edit-button {
-            width: 100%;
-          }
-
-
-          .profile-card {
-            padding: 20px;
-          }
-
-
-          .form-grid {
-            grid-template-columns: 1fr;
-          }
-
-
-          .full-width {
-            grid-column: auto;
-          }
-
-
-          .document-grid {
-            grid-template-columns: 1fr;
-          }
-
-
-          .form-actions {
-            flex-direction: column-reverse;
-          }
-
-
-          .form-actions button {
-            width: 100%;
-          }
-
-        }
-
-      `}</style>
     </div>
   );
 }
+
+
+/* =====================================================
+   DARK CHARCOAL + PURPLE THEME
+===================================================== */
+
+const styles = {
+
+  page: {
+    minHeight: "100vh",
+    background: "#24232A",
+    color: "#F5F3FF",
+    fontFamily:
+      "system-ui, 'Segoe UI', Roboto, Arial, sans-serif",
+    paddingBottom: "60px",
+  },
+
+  container: {
+    width: "min(1050px, calc(100% - 40px))",
+    margin: "0 auto",
+    paddingTop: "40px",
+  },
+
+  /* HEADER */
+
+  header: {
+    display: "flex",
+    alignItems: "center",
+    gap: "20px",
+    marginBottom: "30px",
+    padding: "26px",
+    borderRadius: "18px",
+    background: "#302E36",
+    border: "1px solid #46414F",
+    boxShadow:
+      "0 8px 25px rgba(0,0,0,0.20)",
+  },
+
+  avatar: {
+    width: "75px",
+    height: "75px",
+    borderRadius: "20px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    flexShrink: 0,
+    background:
+      "linear-gradient(135deg, #8B5CF6, #A855F7)",
+    color: "#FFFFFF",
+    fontSize: "30px",
+    fontWeight: "800",
+    boxShadow:
+      "0 8px 22px rgba(139,92,246,0.25)",
+  },
+
+  headerInfo: {
+    flex: 1,
+  },
+
+  welcomeText: {
+    margin: 0,
+    color: "#A78BFA",
+    fontSize: "12px",
+    fontWeight: "800",
+    letterSpacing: "1px",
+  },
+
+  title: {
+    margin: "5px 0",
+    color: "#F5F3FF",
+    fontSize: "32px",
+    fontWeight: "800",
+  },
+
+  subtitle: {
+    margin: 0,
+    color: "#A9A6B8",
+    fontSize: "14px",
+  },
+
+  roleBadge: {
+    padding: "9px 15px",
+    borderRadius: "20px",
+    background: "#3A2E52",
+    border: "1px solid #6D4BC4",
+    color: "#C4B5FD",
+    fontSize: "13px",
+    fontWeight: "700",
+    whiteSpace: "nowrap",
+  },
+
+
+  /* PROFILE CARD */
+
+  profileCard: {
+    background: "#302E36",
+    border: "1px solid #46414F",
+    borderRadius: "18px",
+    padding: "28px",
+    boxShadow:
+      "0 8px 25px rgba(0,0,0,0.18)",
+  },
+
+  cardHeader: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    gap: "20px",
+    paddingBottom: "22px",
+    borderBottom: "1px solid #46414F",
+    marginBottom: "22px",
+  },
+
+  cardTitle: {
+    margin: 0,
+    color: "#F5F3FF",
+    fontSize: "22px",
+  },
+
+  cardSubtitle: {
+    margin: "5px 0 0",
+    color: "#A9A6B8",
+    fontSize: "13px",
+  },
+
+  editButton: {
+    padding: "10px 17px",
+    borderRadius: "9px",
+    border: "1px solid #6D4BC4",
+    background: "#3A2E52",
+    color: "#C4B5FD",
+    fontWeight: "700",
+    cursor: "pointer",
+  },
+
+
+  /* INFORMATION */
+
+  infoGrid: {
+    display: "grid",
+    gridTemplateColumns:
+      "repeat(auto-fit, minmax(230px, 1fr))",
+    gap: "16px",
+  },
+
+  infoBox: {
+    display: "flex",
+    alignItems: "center",
+    gap: "13px",
+    padding: "18px",
+    background: "#3A3842",
+    border: "1px solid #46414F",
+    borderRadius: "13px",
+  },
+
+  infoIcon: {
+    width: "45px",
+    height: "45px",
+    borderRadius: "12px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    background: "#3A2E52",
+    fontSize: "20px",
+    flexShrink: 0,
+  },
+
+  infoLabel: {
+    margin: 0,
+    color: "#A9A6B8",
+    fontSize: "11px",
+  },
+
+  infoValue: {
+    margin: "4px 0 0",
+    color: "#F5F3FF",
+    fontSize: "14px",
+    fontWeight: "700",
+    wordBreak: "break-word",
+  },
+
+
+  /* FORM */
+
+  form: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "18px",
+  },
+
+  inputGroup: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "7px",
+  },
+
+  label: {
+    color: "#C4B5FD",
+    fontSize: "13px",
+    fontWeight: "700",
+  },
+
+  input: {
+    width: "100%",
+    padding: "13px 15px",
+    borderRadius: "9px",
+    border: "1px solid #46414F",
+    background: "#3A3842",
+    color: "#F5F3FF",
+    fontSize: "14px",
+    outline: "none",
+  },
+
+  formActions: {
+    display: "flex",
+    justifyContent: "flex-end",
+    gap: "10px",
+    marginTop: "5px",
+  },
+
+  cancelButton: {
+    padding: "11px 18px",
+    borderRadius: "9px",
+    border: "1px solid #46414F",
+    background: "#3A3842",
+    color: "#A9A6B8",
+    fontWeight: "700",
+    cursor: "pointer",
+  },
+
+  saveButton: {
+    padding: "11px 18px",
+    border: "none",
+    borderRadius: "9px",
+    background:
+      "linear-gradient(135deg, #8B5CF6, #A855F7)",
+    color: "#FFFFFF",
+    fontWeight: "700",
+    cursor: "pointer",
+    boxShadow:
+      "0 6px 18px rgba(139,92,246,0.25)",
+  },
+
+
+  /* SUMMARY */
+
+  summarySection: {
+    marginTop: "30px",
+  },
+
+  summaryTitle: {
+    margin: "0 0 15px",
+    color: "#F5F3FF",
+    fontSize: "22px",
+  },
+
+  summaryGrid: {
+    display: "grid",
+    gridTemplateColumns:
+      "repeat(auto-fit, minmax(230px, 1fr))",
+    gap: "16px",
+  },
+
+  summaryCard: {
+    display: "flex",
+    alignItems: "center",
+    gap: "14px",
+    padding: "20px",
+    borderRadius: "15px",
+    background: "#302E36",
+    border: "1px solid #46414F",
+    boxShadow:
+      "0 6px 18px rgba(0,0,0,0.15)",
+  },
+
+  summaryIcon: {
+    width: "48px",
+    height: "48px",
+    borderRadius: "13px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    background: "#3A2E52",
+    fontSize: "21px",
+  },
+
+  summaryValue: {
+    display: "block",
+    color: "#F5F3FF",
+    fontSize: "15px",
+  },
+
+  summaryLabel: {
+    display: "block",
+    color: "#A9A6B8",
+    fontSize: "11px",
+    marginTop: "3px",
+  },
+
+
+  /* LOADING */
+
+  loading: {
+    minHeight: "calc(100vh - 70px)",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    background: "#24232A",
+  },
+
+  loadingIcon: {
+    width: "65px",
+    height: "65px",
+    borderRadius: "18px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    background:
+      "linear-gradient(135deg, #8B5CF6, #A855F7)",
+    fontSize: "30px",
+    marginBottom: "15px",
+  },
+
+  loadingTitle: {
+    margin: 0,
+    color: "#F5F3FF",
+  },
+
+  loadingText: {
+    margin: "7px 0 0",
+    color: "#A9A6B8",
+  },
+};
 
 export default Profile;

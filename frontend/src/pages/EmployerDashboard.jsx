@@ -41,23 +41,9 @@ function EmployerDashboard() {
 
   const [loading, setLoading] = useState(true);
 
-  // =========================
-  // Load Dashboard
-  // =========================
-
-  useEffect(() => {
-    fetchMyJobs();
-    fetchStats();
-  }, []);
-
-  // =========================
-  // Fetch My Jobs
-  // =========================
-
   const fetchMyJobs = async () => {
     try {
       const res = await API.get("/jobs/my/jobs");
-
       setJobs(res.data);
     } catch (err) {
       console.error("Jobs Error:", err);
@@ -65,14 +51,9 @@ function EmployerDashboard() {
     }
   };
 
-  // =========================
-  // Fetch Statistics
-  // =========================
-
   const fetchStats = async () => {
     try {
       const res = await API.get("/dashboard/stats");
-
       setStats(res.data);
     } catch (err) {
       console.error("Stats Error:", err);
@@ -82,9 +63,10 @@ function EmployerDashboard() {
     }
   };
 
-  // =========================
-  // Delete Job
-  // =========================
+  useEffect(() => {
+    fetchMyJobs();
+    fetchStats();
+  }, []);
 
   const deleteJob = async (id) => {
     const confirmDelete = window.confirm(
@@ -110,9 +92,9 @@ function EmployerDashboard() {
     }
   };
 
-  // =========================
-  // Bar Chart
-  // =========================
+  /* =========================
+     BAR CHART
+  ========================= */
 
   const barData = {
     labels: [
@@ -136,21 +118,30 @@ function EmployerDashboard() {
         ],
 
         backgroundColor: [
-          "#2563eb",
-          "#9333ea",
-          "#16a34a",
-          "#dc2626",
-          "#f59e0b",
+          "#7C5CFC",
+          "#A855F7",
+          "#9B7BFF",
+          "#C084FC",
+          "#6D4BC4",
         ],
 
-        borderRadius: 8,
+        borderColor: [
+          "#9B7BFF",
+          "#C084FC",
+          "#B8A5FF",
+          "#D8B4FE",
+          "#8B5CF6",
+        ],
+
+        borderWidth: 1,
+        borderRadius: 10,
       },
     ],
   };
 
-  // =========================
-  // Pie Chart
-  // =========================
+  /* =========================
+     PIE CHART
+  ========================= */
 
   const pieData = {
     labels: [
@@ -168,23 +159,90 @@ function EmployerDashboard() {
         ],
 
         backgroundColor: [
-          "#16a34a",
-          "#dc2626",
-          "#f59e0b",
+          "#8B5CF6",
+          "#C084FC",
+          "#6D4BC4",
         ],
 
-        borderWidth: 2,
+        borderColor: "#302E36",
+        borderWidth: 4,
+        hoverOffset: 8,
       },
     ],
   };
 
-  // =========================
-  // Loading
-  // =========================
+  /* =========================
+     BAR CHART OPTIONS
+  ========================= */
+
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: true,
+
+    plugins: {
+      legend: {
+        display: false,
+      },
+    },
+
+    scales: {
+      x: {
+        ticks: {
+          color: "#BDB7C9",
+          font: {
+            size: 12,
+          },
+        },
+
+        grid: {
+          color: "rgba(255,255,255,0.06)",
+        },
+      },
+
+      y: {
+        ticks: {
+          color: "#BDB7C9",
+        },
+
+        grid: {
+          color: "rgba(255,255,255,0.08)",
+        },
+      },
+    },
+  };
+
+  /* =========================
+     PIE CHART OPTIONS
+  ========================= */
+
+  const pieOptions = {
+    responsive: true,
+    maintainAspectRatio: true,
+
+    plugins: {
+      legend: {
+        position: "top",
+
+        labels: {
+          color: "#D8D5E2",
+
+          font: {
+            size: 13,
+          },
+
+          padding: 18,
+        },
+      },
+    },
+  };
+
+  /* =========================
+     LOADING
+  ========================= */
 
   if (loading) {
     return (
-      <>
+      <div style={styles.page}>
         <Navbar />
 
         <div style={styles.loading}>
@@ -192,11 +250,15 @@ function EmployerDashboard() {
             ⏳
           </div>
 
-          <h2>Loading Dashboard...</h2>
+          <h2 style={styles.loadingTitle}>
+            Loading Dashboard...
+          </h2>
 
-          <p>Please wait...</p>
+          <p style={styles.loadingText}>
+            Please wait...
+          </p>
         </div>
-      </>
+      </div>
     );
   }
 
@@ -217,17 +279,21 @@ function EmployerDashboard() {
           </div>
 
           <div>
+            <p style={styles.heroSmallText}>
+              EMPLOYER WORKSPACE
+            </p>
+
             <h1 style={styles.heroTitle}>
               Employer Dashboard
             </h1>
 
             <p style={styles.heroSubtitle}>
-              Manage your jobs, applicants and
-              recruitment activity.
+              Manage your jobs, applicants and recruitment activity.
             </p>
           </div>
 
         </section>
+
 
         {/* =========================
             STATISTICS
@@ -239,46 +305,45 @@ function EmployerDashboard() {
             icon="💼"
             title="Total Jobs"
             value={stats.totalJobs}
-            color="#2563eb"
+            color="#7C5CFC"
           />
 
           <StatCard
             icon="👥"
             title="Applicants"
             value={stats.totalApplicants}
-            color="#9333ea"
+            color="#A855F7"
           />
 
           <StatCard
             icon="✅"
             title="Accepted"
             value={stats.accepted}
-            color="#16a34a"
+            color="#9B7BFF"
           />
 
           <StatCard
             icon="❌"
             title="Rejected"
             value={stats.rejected}
-            color="#dc2626"
+            color="#C084FC"
           />
 
           <StatCard
             icon="⏳"
             title="Pending"
             value={stats.pending}
-            color="#f59e0b"
+            color="#6D4BC4"
           />
 
         </section>
+
 
         {/* =========================
             CHARTS
         ========================= */}
 
         <section style={styles.chartGrid}>
-
-          {/* Bar Chart */}
 
           <div style={styles.chartCard}>
 
@@ -289,22 +354,12 @@ function EmployerDashboard() {
             <div style={styles.chart}>
               <Bar
                 data={barData}
-                options={{
-                  responsive: true,
-                  maintainAspectRatio: true,
-
-                  plugins: {
-                    legend: {
-                      display: false,
-                    },
-                  },
-                }}
+                options={chartOptions}
               />
             </div>
 
           </div>
 
-          {/* Pie Chart */}
 
           <div style={styles.chartCard}>
 
@@ -315,16 +370,14 @@ function EmployerDashboard() {
             <div style={styles.pieChart}>
               <Pie
                 data={pieData}
-                options={{
-                  responsive: true,
-                  maintainAspectRatio: true,
-                }}
+                options={pieOptions}
               />
             </div>
 
           </div>
 
         </section>
+
 
         {/* =========================
             JOB SECTION
@@ -335,14 +388,21 @@ function EmployerDashboard() {
           <div style={styles.jobsHeader}>
 
             <div>
+
+              <p style={styles.sectionSmallText}>
+                JOB MANAGEMENT
+              </p>
+
               <h2 style={styles.jobsTitle}>
                 💼 Your Posted Jobs
               </h2>
 
               <p style={styles.jobsSubtitle}>
-                Manage your active job postings
+                Manage and monitor your active job postings.
               </p>
+
             </div>
+
 
             <button
               onClick={() =>
@@ -350,10 +410,11 @@ function EmployerDashboard() {
               }
               style={styles.addButton}
             >
-              + Add New Job
+              ＋ Add New Job
             </button>
 
           </div>
+
 
           {/* =========================
               NO JOBS
@@ -372,8 +433,8 @@ function EmployerDashboard() {
               </h2>
 
               <p style={styles.emptyText}>
-                Create your first job posting
-                to start receiving applications.
+                Create your first job posting to start
+                receiving applications.
               </p>
 
               <button
@@ -382,16 +443,12 @@ function EmployerDashboard() {
                 }
                 style={styles.emptyButton}
               >
-                + Post Your First Job
+                ＋ Post Your First Job
               </button>
 
             </div>
 
           ) : (
-
-            /* =========================
-               JOB LIST
-            ========================= */
 
             <div style={styles.jobsList}>
 
@@ -402,9 +459,7 @@ function EmployerDashboard() {
                   style={styles.jobCard}
                 >
 
-                  {/* =========================
-                      JOB HEADER
-                  ========================= */}
+                  {/* JOB HEADER */}
 
                   <div style={styles.jobHeader}>
 
@@ -426,9 +481,8 @@ function EmployerDashboard() {
 
                   </div>
 
-                  {/* =========================
-                      JOB DETAILS
-                  ========================= */}
+
+                  {/* JOB DETAILS */}
 
                   <div style={styles.detailsGrid}>
 
@@ -439,6 +493,7 @@ function EmployerDashboard() {
                       </span>
 
                       <div>
+
                         <small style={styles.detailLabel}>
                           Location
                         </small>
@@ -447,9 +502,11 @@ function EmployerDashboard() {
                           {job.location ||
                             "Not specified"}
                         </strong>
+
                       </div>
 
                     </div>
+
 
                     <div style={styles.detailBox}>
 
@@ -458,6 +515,7 @@ function EmployerDashboard() {
                       </span>
 
                       <div>
+
                         <small style={styles.detailLabel}>
                           Salary
                         </small>
@@ -466,15 +524,15 @@ function EmployerDashboard() {
                           {job.salaryRange ||
                             "Not specified"}
                         </strong>
+
                       </div>
 
                     </div>
 
                   </div>
 
-                  {/* =========================
-                      DESCRIPTION
-                  ========================= */}
+
+                  {/* DESCRIPTION */}
 
                   <div style={styles.descriptionBox}>
 
@@ -489,9 +547,8 @@ function EmployerDashboard() {
 
                   </div>
 
-                  {/* =========================
-                      ACTION BUTTONS
-                  ========================= */}
+
+                  {/* ACTION BUTTONS */}
 
                   <div style={styles.actions}>
 
@@ -506,6 +563,7 @@ function EmployerDashboard() {
                       ✏️ Edit
                     </button>
 
+
                     <button
                       onClick={() =>
                         deleteJob(job._id)
@@ -514,6 +572,7 @@ function EmployerDashboard() {
                     >
                       🗑️ Delete
                     </button>
+
 
                     <button
                       onClick={() =>
@@ -555,21 +614,24 @@ function StatCard({
   color,
 }) {
   return (
+
     <div
       style={{
         ...styles.statCard,
-        borderTop: `4px solid ${color}`,
+        borderTop: `3px solid ${color}`,
       }}
     >
 
       <div
         style={{
           ...styles.statIcon,
-          background: `${color}18`,
+          background: `${color}20`,
+          border: `1px solid ${color}40`,
         }}
       >
         {icon}
       </div>
+
 
       <div>
 
@@ -584,28 +646,33 @@ function StatCard({
       </div>
 
     </div>
+
   );
 }
 
 
 /* =====================================================
-   STYLES
+   PURPLE DARK THEME STYLES
 ===================================================== */
 
 const styles = {
+
+  /* PAGE */
 
   page: {
     minHeight: "100vh",
 
     background:
-      "linear-gradient(135deg, #eef4ff 0%, #f8fafc 50%, #f5f3ff 100%)",
+      "linear-gradient(135deg, #24232A 0%, #1F1E25 50%, #282430 100%)",
 
     fontFamily:
       "'Segoe UI', Arial, sans-serif",
 
-    color: "#172554",
+    color: "#F5F3FF",
   },
 
+
+  /* CONTAINER */
 
   container: {
     width:
@@ -613,11 +680,11 @@ const styles = {
 
     margin: "0 auto",
 
-    padding: "35px 0 60px",
+    padding: "35px 0 70px",
   },
 
 
-  /* ================= HERO ================= */
+  /* HERO */
 
   hero: {
     display: "flex",
@@ -626,30 +693,32 @@ const styles = {
 
     gap: "18px",
 
-    padding: "25px",
+    padding: "28px",
 
     marginBottom: "25px",
 
     borderRadius: "18px",
 
     background:
-      "linear-gradient(135deg, #1e3a8a, #2563eb, #7c3aed)",
+      "linear-gradient(135deg, #302E36 0%, #373149 55%, #49317A 100%)",
 
-    color: "white",
+    border:
+      "1px solid #4A4555",
 
     boxShadow:
-      "0 15px 35px rgba(37,99,235,0.25)",
+      "0 15px 40px rgba(0,0,0,0.30)",
   },
 
 
   heroIcon: {
-    width: "62px",
-    height: "62px",
+    width: "64px",
+
+    height: "64px",
 
     borderRadius: "16px",
 
     background:
-      "rgba(255,255,255,0.16)",
+      "linear-gradient(135deg, #7C5CFC, #A855F7)",
 
     display: "flex",
 
@@ -660,29 +729,46 @@ const styles = {
     fontSize: "28px",
 
     flexShrink: 0,
+
+    boxShadow:
+      "0 8px 22px rgba(139,92,246,0.30)",
+  },
+
+
+  heroSmallText: {
+    margin: 0,
+
+    color: "#B8A5FF",
+
+    fontSize: "11px",
+
+    fontWeight: "800",
+
+    letterSpacing: "1.5px",
   },
 
 
   heroTitle: {
-    margin: 0,
+    margin: "5px 0",
 
-    fontSize: "30px",
+    fontSize: "32px",
 
     fontWeight: "800",
+
+    color: "#F5F3FF",
   },
 
 
   heroSubtitle: {
-    margin: "5px 0 0",
+    margin: 0,
 
-    color:
-      "rgba(255,255,255,0.85)",
+    color: "#B7B1C4",
 
-    fontSize: "13px",
+    fontSize: "14px",
   },
 
 
-  /* ================= STATS ================= */
+  /* STATISTICS */
 
   statsGrid: {
     display: "grid",
@@ -690,18 +776,22 @@ const styles = {
     gridTemplateColumns:
       "repeat(auto-fit, minmax(180px, 1fr))",
 
-    gap: "15px",
+    gap: "16px",
 
     marginBottom: "25px",
   },
 
 
   statCard: {
-    background: "#ffffff",
+    background:
+      "linear-gradient(145deg, #302E36, #2B2931)",
 
     padding: "20px",
 
     borderRadius: "15px",
+
+    border:
+      "1px solid #46414F",
 
     display: "flex",
 
@@ -710,13 +800,14 @@ const styles = {
     gap: "14px",
 
     boxShadow:
-      "0 5px 20px rgba(15,23,42,0.08)",
+      "0 8px 25px rgba(0,0,0,0.22)",
   },
 
 
   statIcon: {
-    width: "45px",
-    height: "45px",
+    width: "48px",
+
+    height: "48px",
 
     borderRadius: "12px",
 
@@ -726,7 +817,7 @@ const styles = {
 
     justifyContent: "center",
 
-    fontSize: "20px",
+    fontSize: "21px",
 
     flexShrink: 0,
   },
@@ -735,18 +826,18 @@ const styles = {
   statValue: {
     margin: 0,
 
-    fontSize: "27px",
+    fontSize: "28px",
 
     fontWeight: "800",
 
-    color: "#172554",
+    color: "#F5F3FF",
   },
 
 
   statTitle: {
     margin: "3px 0 0",
 
-    color: "#64748b",
+    color: "#A9A6B8",
 
     fontSize: "12px",
 
@@ -754,7 +845,7 @@ const styles = {
   },
 
 
-  /* ================= CHARTS ================= */
+  /* CHARTS */
 
   chartGrid: {
     display: "grid",
@@ -764,19 +855,23 @@ const styles = {
 
     gap: "20px",
 
-    marginBottom: "35px",
+    marginBottom: "40px",
   },
 
 
   chartCard: {
-    background: "#ffffff",
+    background:
+      "linear-gradient(145deg, #302E36, #29272F)",
 
     padding: "22px",
 
-    borderRadius: "16px",
+    borderRadius: "17px",
+
+    border:
+      "1px solid #46414F",
 
     boxShadow:
-      "0 5px 20px rgba(15,23,42,0.08)",
+      "0 8px 25px rgba(0,0,0,0.25)",
   },
 
 
@@ -785,9 +880,9 @@ const styles = {
 
     textAlign: "center",
 
-    fontSize: "17px",
+    fontSize: "18px",
 
-    color: "#172554",
+    color: "#F5F3FF",
 
     fontWeight: "800",
   },
@@ -805,10 +900,10 @@ const styles = {
   },
 
 
-  /* ================= JOB SECTION ================= */
+  /* JOB SECTION */
 
   jobsSection: {
-    marginTop: "35px",
+    marginTop: "20px",
   },
 
 
@@ -825,37 +920,50 @@ const styles = {
   },
 
 
-  jobsTitle: {
-    margin: 0,
+  sectionSmallText: {
+    margin: "0 0 5px",
 
-    fontSize: "23px",
+    color: "#A78BFA",
+
+    fontSize: "11px",
 
     fontWeight: "800",
 
-    color: "#172554",
+    letterSpacing: "1.5px",
+  },
+
+
+  jobsTitle: {
+    margin: 0,
+
+    fontSize: "25px",
+
+    fontWeight: "800",
+
+    color: "#F5F3FF",
   },
 
 
   jobsSubtitle: {
-    margin: "5px 0 0",
+    margin: "6px 0 0",
 
-    color: "#64748b",
+    color: "#A9A6B8",
 
-    fontSize: "12px",
+    fontSize: "13px",
   },
 
 
   addButton: {
     border: "none",
 
-    borderRadius: "9px",
+    borderRadius: "10px",
 
-    padding: "12px 18px",
+    padding: "13px 19px",
 
     background:
-      "linear-gradient(135deg, #2563eb, #7c3aed)",
+      "linear-gradient(135deg, #7C5CFC, #A855F7)",
 
-    color: "#ffffff",
+    color: "#FFFFFF",
 
     fontSize: "13px",
 
@@ -864,7 +972,7 @@ const styles = {
     cursor: "pointer",
 
     boxShadow:
-      "0 8px 20px rgba(37,99,235,0.2)",
+      "0 8px 20px rgba(139,92,246,0.30)",
   },
 
 
@@ -877,22 +985,23 @@ const styles = {
   },
 
 
-  /* ================= JOB CARD ================= */
+  /* JOB CARD */
 
   jobCard: {
-    background: "#ffffff",
+    background:
+      "linear-gradient(145deg, #302E36, #29272F)",
 
-    color: "#172554",
+    color: "#F5F3FF",
 
     padding: "24px",
 
-    borderRadius: "16px",
-
-    boxShadow:
-      "0 7px 25px rgba(15,23,42,0.08)",
+    borderRadius: "17px",
 
     border:
-      "1px solid #e2e8f0",
+      "1px solid #46414F",
+
+    boxShadow:
+      "0 8px 28px rgba(0,0,0,0.25)",
   },
 
 
@@ -901,22 +1010,27 @@ const styles = {
 
     alignItems: "center",
 
-    gap: "13px",
+    gap: "14px",
 
-    paddingBottom: "17px",
+    paddingBottom: "18px",
 
     borderBottom:
-      "1px solid #e2e8f0",
+      "1px solid #46414F",
   },
 
 
   jobIcon: {
-    width: "50px",
-    height: "50px",
+    width: "52px",
 
-    borderRadius: "13px",
+    height: "52px",
 
-    background: "#eff6ff",
+    borderRadius: "14px",
+
+    background:
+      "linear-gradient(135deg, #41365B, #332B47)",
+
+    border:
+      "1px solid #5A4A75",
 
     display: "flex",
 
@@ -938,7 +1052,7 @@ const styles = {
   jobTitle: {
     margin: 0,
 
-    color: "#172554",
+    color: "#F5F3FF",
 
     fontSize: "24px",
 
@@ -951,15 +1065,15 @@ const styles = {
   companyName: {
     margin: "6px 0 0",
 
-    color: "#475569",
+    color: "#B0AABA",
 
-    fontSize: "16px",
+    fontSize: "15px",
 
     fontWeight: "600",
   },
 
 
-  /* ================= DETAILS ================= */
+  /* DETAILS */
 
   detailsGrid: {
     display: "grid",
@@ -967,7 +1081,7 @@ const styles = {
     gridTemplateColumns:
       "repeat(auto-fit, minmax(220px, 1fr))",
 
-    gap: "12px",
+    gap: "13px",
 
     marginTop: "18px",
   },
@@ -978,38 +1092,39 @@ const styles = {
 
     alignItems: "center",
 
-    gap: "10px",
+    gap: "11px",
 
-    padding: "13px",
+    padding: "14px",
 
-    borderRadius: "10px",
+    borderRadius: "11px",
 
-    background: "#f8fafc",
+    background: "#25242B",
 
-    color: "#172554",
+    border:
+      "1px solid #403C48",
   },
 
 
   detailIcon: {
-    fontSize: "20px",
+    fontSize: "21px",
   },
 
 
   detailLabel: {
     display: "block",
 
-    color: "#64748b",
+    color: "#8F8A9B",
 
     fontSize: "11px",
 
-    marginBottom: "3px",
+    marginBottom: "4px",
   },
 
 
   detailValue: {
     display: "block",
 
-    color: "#172554",
+    color: "#F5F3FF",
 
     fontSize: "14px",
 
@@ -1017,18 +1132,19 @@ const styles = {
   },
 
 
-  /* ================= DESCRIPTION ================= */
+  /* DESCRIPTION */
 
   descriptionBox: {
     marginTop: "17px",
 
-    padding: "15px",
+    padding: "16px",
 
-    borderRadius: "11px",
+    borderRadius: "12px",
 
-    background: "#f8fafc",
+    background: "#25242B",
 
-    color: "#475569",
+    border:
+      "1px solid #403C48",
 
     fontSize: "13px",
 
@@ -1037,22 +1153,22 @@ const styles = {
 
 
   descriptionTitle: {
-    color: "#172554",
+    color: "#E8E4F0",
 
     display: "block",
 
-    marginBottom: "6px",
+    marginBottom: "7px",
   },
 
 
   descriptionText: {
     margin: 0,
 
-    color: "#475569",
+    color: "#AAA5B5",
   },
 
 
-  /* ================= BUTTONS ================= */
+  /* ACTION BUTTONS */
 
   actions: {
     display: "flex",
@@ -1066,15 +1182,16 @@ const styles = {
 
 
   editButton: {
-    border: "none",
+    border:
+      "1px solid #8B5CF6",
 
-    borderRadius: "8px",
+    borderRadius: "9px",
 
     padding: "10px 17px",
 
-    background: "#f59e0b",
+    background: "#3A2E52",
 
-    color: "#ffffff",
+    color: "#C4B5FD",
 
     fontWeight: "700",
 
@@ -1083,15 +1200,16 @@ const styles = {
 
 
   deleteButton: {
-    border: "none",
+    border:
+      "1px solid #704A8D",
 
-    borderRadius: "8px",
+    borderRadius: "9px",
 
     padding: "10px 17px",
 
-    background: "#dc2626",
+    background: "#382D42",
 
-    color: "#ffffff",
+    color: "#D8B4FE",
 
     fontWeight: "700",
 
@@ -1102,72 +1220,76 @@ const styles = {
   viewButton: {
     border: "none",
 
-    borderRadius: "8px",
+    borderRadius: "9px",
 
     padding: "10px 17px",
 
     background:
-      "linear-gradient(135deg, #2563eb, #4f46e5)",
+      "linear-gradient(135deg, #7C5CFC, #A855F7)",
 
-    color: "#ffffff",
+    color: "#FFFFFF",
 
     fontWeight: "700",
 
     cursor: "pointer",
 
     boxShadow:
-      "0 5px 15px rgba(37,99,235,0.2)",
+      "0 5px 15px rgba(139,92,246,0.25)",
   },
 
 
-  /* ================= EMPTY ================= */
+  /* EMPTY STATE */
 
   emptyBox: {
-    background: "#ffffff",
+    background:
+      "linear-gradient(145deg, #302E36, #29272F)",
 
     padding: "55px 25px",
 
-    borderRadius: "17px",
+    borderRadius: "18px",
+
+    border:
+      "1px solid #46414F",
 
     textAlign: "center",
 
     boxShadow:
-      "0 7px 25px rgba(15,23,42,0.08)",
+      "0 8px 28px rgba(0,0,0,0.25)",
   },
 
 
   emptyIcon: {
-    fontSize: "45px",
+    fontSize: "48px",
 
-    marginBottom: "8px",
+    marginBottom: "10px",
   },
 
 
   emptyTitle: {
-    color: "#172554",
+    color: "#F5F3FF",
 
     margin: "8px 0",
   },
 
 
   emptyText: {
-    color: "#64748b",
+    color: "#A9A6B8",
   },
 
 
   emptyButton: {
-    marginTop: "10px",
+    marginTop: "12px",
 
     border: "none",
 
-    borderRadius: "9px",
+    borderRadius: "10px",
 
-    padding: "11px 18px",
+    padding: "12px 20px",
 
     background:
-      "linear-gradient(135deg, #2563eb, #7c3aed)",
+      "linear-gradient(135deg, #7C5CFC, #A855F7)",
 
-    color: "#ffffff",
+    color: "#FFFFFF",
 
     fontWeight: "700",
 
@@ -1175,7 +1297,7 @@ const styles = {
   },
 
 
-  /* ================= LOADING ================= */
+  /* LOADING */
 
   loading: {
     minHeight: "80vh",
@@ -1188,13 +1310,29 @@ const styles = {
 
     justifyContent: "center",
 
-    color: "#172554",
+    background:
+      "linear-gradient(135deg, #24232A, #1F1E25)",
+
+    color: "#F5F3FF",
   },
 
 
   loadingIcon: {
-    fontSize: "40px",
+    fontSize: "42px",
   },
+
+
+  loadingTitle: {
+    color: "#F5F3FF",
+
+    margin: "15px 0 5px",
+  },
+
+
+  loadingText: {
+    color: "#A9A6B8",
+  },
+
 };
 
 export default EmployerDashboard;

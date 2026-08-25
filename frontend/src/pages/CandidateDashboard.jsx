@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import API from "../api/axios";
 
@@ -27,8 +26,6 @@ ChartJS.register(
 );
 
 function CandidateDashboard() {
-  const navigate = useNavigate();
-
   const [stats, setStats] = useState({
     totalApplications: 0,
     accepted: 0,
@@ -38,54 +35,31 @@ function CandidateDashboard() {
     recentApplications: [],
   });
 
-  const [recommendedJobs, setRecommendedJobs] =
-    useState([]);
-
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetchStats();
-    fetchRecommendedJobs();
-  }, []);
-
-  // =========================
-  // Fetch Candidate Stats
-  // =========================
+  const [recommendedJobs, setRecommendedJobs] = useState([]);
 
   const fetchStats = async () => {
     try {
-      const res = await API.get(
-        "/candidate-dashboard/stats"
-      );
-
+      const res = await API.get("/candidate-dashboard/stats");
       setStats(res.data);
     } catch (err) {
       console.error(err);
       alert("Failed to load dashboard");
-    } finally {
-      setLoading(false);
     }
   };
 
-  // =========================
-  // Fetch Recommended Jobs
-  // =========================
-
   const fetchRecommendedJobs = async () => {
     try {
-      const res = await API.get(
-        "/jobs/recommended"
-      );
-
+      const res = await API.get("/jobs/recommended");
       setRecommendedJobs(res.data);
     } catch (err) {
       console.error(err);
     }
   };
 
-  // =========================
-  // Charts
-  // =========================
+  useEffect(() => {
+    fetchStats();
+    fetchRecommendedJobs();
+  }, []);
 
   const barData = {
     labels: [
@@ -95,11 +69,9 @@ function CandidateDashboard() {
       "Pending",
       "Saved Jobs",
     ],
-
     datasets: [
       {
-        label: "My Statistics",
-
+        label: "Statistics",
         data: [
           stats.totalApplications,
           stats.accepted,
@@ -107,27 +79,20 @@ function CandidateDashboard() {
           stats.pending,
           stats.savedJobs,
         ],
-
         backgroundColor: [
-          "#2563eb",
-          "#16a34a",
-          "#dc2626",
-          "#f59e0b",
-          "#9333ea",
+          "#8B5CF6",
+          "#22C55E",
+          "#EF4444",
+          "#F59E0B",
+          "#A855F7",
         ],
-
-        borderRadius: 7,
+        borderRadius: 8,
       },
     ],
   };
 
   const pieData = {
-    labels: [
-      "Accepted",
-      "Rejected",
-      "Pending",
-    ],
-
+    labels: ["Accepted", "Rejected", "Pending"],
     datasets: [
       {
         data: [
@@ -135,649 +100,312 @@ function CandidateDashboard() {
           stats.rejected,
           stats.pending,
         ],
-
         backgroundColor: [
-          "#16a34a",
-          "#dc2626",
-          "#f59e0b",
+          "#22C55E",
+          "#EF4444",
+          "#A855F7",
         ],
-
-        borderWidth: 2,
+        borderColor: "#302E36",
+        borderWidth: 3,
       },
     ],
   };
 
-  // =========================
-  // Loading
-  // =========================
-
-  if (loading) {
-    return (
-      <>
-        <Navbar />
-
-        <div style={styles.loading}>
-          <div style={styles.loadingIcon}>
-            ⏳
-          </div>
-
-          <h2>Loading Dashboard...</h2>
-          <p>Please wait</p>
-        </div>
-      </>
-    );
-  }
+  const chartOptions = {
+    responsive: true,
+    plugins: {
+      legend: {
+        labels: {
+          color: "#F5F3FF",
+        },
+      },
+    },
+    scales: {
+      x: {
+        ticks: {
+          color: "#A9A6B8",
+        },
+        grid: {
+          color: "#46414F",
+        },
+      },
+      y: {
+        beginAtZero: true,
+        ticks: {
+          color: "#A9A6B8",
+        },
+        grid: {
+          color: "#46414F",
+        },
+      },
+    },
+  };
 
   return (
-    <div style={styles.page}>
+    <>
       <Navbar />
 
-      <main style={styles.container}>
+      <div style={styles.page}>
+        <div style={styles.container}>
 
-        {/* =========================
-            HERO
-        ========================= */}
+          {/* HEADER */}
 
-        <section style={styles.hero}>
+          <div style={styles.header}>
+            <p style={styles.welcome}>
+              WELCOME BACK 👋
+            </p>
 
-          <div style={styles.heroIcon}>
-            👤
-          </div>
-
-          <div style={styles.heroContent}>
-            <h1 style={styles.heroTitle}>
+            <h1 style={styles.title}>
               Candidate Dashboard
             </h1>
 
-            <p style={styles.heroSubtitle}>
-              Welcome back! Track your applications
-              and discover your next opportunity.
+            <p style={styles.subtitle}>
+              Track your applications, job opportunities and career progress.
             </p>
           </div>
 
-        </section>
+          {/* STATISTICS */}
 
+          <div style={styles.statsGrid}>
+            <StatCard
+              icon="📄"
+              title="Applications"
+              value={stats.totalApplications}
+              color="#8B5CF6"
+            />
 
-        {/* =========================
-            STATISTICS
-        ========================= */}
+            <StatCard
+              icon="✅"
+              title="Accepted"
+              value={stats.accepted}
+              color="#22C55E"
+            />
 
-        <section style={styles.statsGrid}>
+            <StatCard
+              icon="❌"
+              title="Rejected"
+              value={stats.rejected}
+              color="#EF4444"
+            />
 
-          <StatCard
-            icon="📄"
-            title="Applications"
-            value={stats.totalApplications}
-            color="#2563eb"
-          />
+            <StatCard
+              icon="⏳"
+              title="Pending"
+              value={stats.pending}
+              color="#F59E0B"
+            />
 
-          <StatCard
-            icon="✅"
-            title="Accepted"
-            value={stats.accepted}
-            color="#16a34a"
-          />
+            <StatCard
+              icon="❤️"
+              title="Saved Jobs"
+              value={stats.savedJobs}
+              color="#A855F7"
+            />
+          </div>
 
-          <StatCard
-            icon="❌"
-            title="Rejected"
-            value={stats.rejected}
-            color="#dc2626"
-          />
+          {/* CHARTS */}
 
-          <StatCard
-            icon="⏳"
-            title="Pending"
-            value={stats.pending}
-            color="#f59e0b"
-          />
+          <div style={styles.sectionHeader}>
+            <div>
+              <h2 style={styles.sectionTitle}>
+                Your Progress
+              </h2>
 
-          <StatCard
-            icon="❤️"
-            title="Saved Jobs"
-            value={stats.savedJobs}
-            color="#9333ea"
-          />
+              <p style={styles.sectionSubtitle}>
+                Overview of your job applications and application status.
+              </p>
+            </div>
+          </div>
 
-        </section>
+          <div style={styles.chartGrid}>
+            <div style={styles.chartCard}>
+              <h2 style={styles.chartTitle}>
+                Application Statistics
+              </h2>
 
-
-        {/* =========================
-            CHARTS
-        ========================= */}
-
-        <section style={styles.chartGrid}>
-
-          <div style={styles.chartCard}>
-
-            <h2 style={styles.sectionTitle}>
-              📊 Application Statistics
-            </h2>
-
-            <div style={styles.barChartWrap}>
               <Bar
                 data={barData}
+                options={chartOptions}
+              />
+            </div>
+
+            <div style={styles.chartCard}>
+              <h2 style={styles.chartTitle}>
+                Application Status
+              </h2>
+
+              <Pie
+                data={pieData}
                 options={{
                   responsive: true,
-                  maintainAspectRatio: false,
-
                   plugins: {
                     legend: {
-                      display: false,
+                      labels: {
+                        color: "#F5F3FF",
+                      },
                     },
                   },
                 }}
               />
             </div>
-
           </div>
 
+          {/* AI RECOMMENDED JOBS */}
 
-          <div style={styles.chartCard}>
+          <div style={styles.jobsSection}>
+            <div style={styles.sectionHeader}>
+              <div>
+                <h2 style={styles.sectionTitle}>
+                  ⭐ AI Recommended Jobs
+                </h2>
 
-            <h2 style={styles.sectionTitle}>
-              📈 Application Status
-            </h2>
-
-            <div style={styles.pieChartWrap}>
-              <Pie
-                data={pieData}
-                options={{
-                  responsive: true,
-                  maintainAspectRatio: false,
-                }}
-              />
+                <p style={styles.sectionSubtitle}>
+                  Jobs recommended based on your profile.
+                </p>
+              </div>
             </div>
 
-          </div>
-
-        </section>
-
-
-        {/* =========================
-            AI RECOMMENDED JOBS
-        ========================= */}
-
-        <section style={styles.section}>
-
-          <div style={styles.sectionHeader}>
-
-            <div style={styles.sectionHeadingBlock}>
-
-              <h2 style={styles.mainSectionTitle}>
-                ⭐ AI Recommended Jobs
-              </h2>
-
-              <p style={styles.sectionSubtitle}>
-                Jobs matched with your skills
-              </p>
-
-            </div>
-
-          </div>
-
-
-          {recommendedJobs.length > 0 ? (
-
-            <div style={styles.jobsGrid}>
-
-              {recommendedJobs.map((job) => (
-
+            {recommendedJobs.length > 0 ? (
+              recommendedJobs.map((job) => (
                 <div
                   key={job._id}
                   style={styles.jobCard}
                 >
-
                   <div style={styles.jobTop}>
-
-                    <div style={styles.jobIcon}>
-                      💼
-                    </div>
-
-                    <div style={styles.jobHeading}>
-                      <h3 style={styles.jobTitle}>
+                    <div>
+                      <h2 style={styles.jobTitle}>
                         {job.title}
-                      </h3>
+                      </h2>
 
                       <p style={styles.company}>
                         🏢 {job.company}
                       </p>
                     </div>
 
+                    <div style={styles.scoreBox}>
+                      {job.score}%
+                      <span>Match</span>
+                    </div>
                   </div>
 
+                  <div style={styles.jobInfo}>
+                    <span>
+                      📍 {job.location}
+                    </span>
 
-                  <div style={styles.jobDetails}>
-
-                    <div style={styles.jobDetailBox}>
-                      <small>
-                        Location
-                      </small>
-
-                      <strong>
-                        📍 {job.location}
-                      </strong>
-                    </div>
-
-                    <div style={styles.jobDetailBox}>
-                      <small>
-                        Salary
-                      </small>
-
-                      <strong>
-                        💰 {job.salaryRange}
-                      </strong>
-                    </div>
-
+                    <span>
+                      💰 {job.salaryRange}
+                    </span>
                   </div>
 
+                  <p style={styles.skills}>
+                    <strong>✅ Matched Skills:</strong>{" "}
+                    {job.matchedSkills?.length > 0
+                      ? job.matchedSkills.join(", ")
+                      : "None"}
+                  </p>
 
-                  {/* Match Score */}
-
-                  <div style={styles.matchBox}>
-
-                    <div style={styles.matchHeader}>
-
-                      <strong>
-                        🎯 Match Score
-                      </strong>
-
-                      <strong
-                        style={{
-                          color:
-                            job.score >= 80
-                              ? "#16a34a"
-                              : job.score >= 50
-                                ? "#d97706"
-                                : "#dc2626",
-                        }}
-                      >
-                        {job.score || 0}%
-                      </strong>
-
-                    </div>
-
-                    <div
-                      style={styles.progressBackground}
-                    >
-                      <div
-                        style={{
-                          ...styles.progress,
-                          width: `${Math.min(
-                            job.score || 0,
-                            100
-                          )}%`,
-                        }}
-                      />
-                    </div>
-
-                  </div>
-
-
-                  {/* Skills */}
-
-                  <div style={styles.skillsBox}>
-
-                    <strong>
-                      ✅ Matched Skills
-                    </strong>
-
-                    <div style={styles.skills}>
-
-                      {job.matchedSkills?.length > 0 ? (
-
-                        job.matchedSkills.map(
-                          (skill, index) => (
-                            <span
-                              key={index}
-                              style={styles.skill}
-                            >
-                              {skill}
-                            </span>
-                          )
-                        )
-
-                      ) : (
-
-                        <span style={styles.noSkills}>
-                          No matched skills
-                        </span>
-
-                      )}
-
-                    </div>
-
-                  </div>
-
-
-                  <button
-                    onClick={() =>
-                      navigate(
-                        `/apply/${job._id}`
-                      )
-                    }
-                    style={styles.applyButton}
-                  >
-                    🚀 Apply Now
+                  <button style={styles.applyButton}>
+                    Apply Now
                   </button>
-
+                </div>
+              ))
+            ) : (
+              <div style={styles.emptyCard}>
+                <div style={styles.emptyIcon}>
+                  💼
                 </div>
 
-              ))}
+                <h3 style={styles.emptyTitle}>
+                  No Recommended Jobs Yet
+                </h3>
 
-            </div>
-
-          ) : (
-
-            <div style={styles.emptyBox}>
-
-              <div style={styles.emptyIcon}>
-                🔍
+                <p style={styles.emptyText}>
+                  New job recommendations will appear here.
+                </p>
               </div>
-
-              <h3>
-                No Recommended Jobs Yet
-              </h3>
-
-              <p>
-                Complete your profile and add
-                skills to get better recommendations.
-              </p>
-
-            </div>
-
-          )}
-
-        </section>
-
-
-        {/* =========================
-            RECENT APPLICATIONS
-        ========================= */}
-
-        <section style={styles.section}>
-
-          <div style={styles.sectionHeader}>
-
-            <div style={styles.sectionHeadingBlock}>
-
-              <h2 style={styles.mainSectionTitle}>
-                📋 Recent Applications
-              </h2>
-
-              <p style={styles.sectionSubtitle}>
-                Track your latest job applications
-              </p>
-
-            </div>
-
-            <button
-              onClick={() =>
-                navigate("/my-applications")
-              }
-              style={styles.viewAllButton}
-            >
-              View All →
-            </button>
-
+            )}
           </div>
 
+          {/* RECENT APPLICATIONS */}
 
-          {stats.recentApplications &&
-            stats.recentApplications.length > 0 ? (
+          <div style={styles.jobsSection}>
+            <div style={styles.sectionHeader}>
+              <div>
+                <h2 style={styles.sectionTitle}>
+                  Recent Applications
+                </h2>
 
-            <div style={styles.applicationList}>
-
-              {stats.recentApplications.map(
-                (application) => {
-
-                  const status =
-                    application.status;
-
-                  const statusStyle =
-                    status === "Accepted"
-                      ? styles.accepted
-                      : status === "Rejected"
-                        ? styles.rejected
-                        : styles.pending;
-
-                  return (
-                    <div
-                      key={application._id}
-                      style={styles.applicationCard}
-                    >
-
-                      <div style={styles.applicationIcon}>
-                        💼
-                      </div>
-
-                      <div
-                        style={
-                          styles.applicationInfo
-                        }
-                      >
-
-                        <h3>
-                          {application.job?.title ||
-                            "Job"}
-                        </h3>
-
-                        <p>
-                          🏢{" "}
-                          {application.job?.company ||
-                            "Company"}
-                        </p>
-
-                        <small>
-                          📅 Applied on{" "}
-                          {application.createdAt
-                            ? new Date(
-                              application.createdAt
-                            ).toLocaleDateString()
-                            : "N/A"}
-                        </small>
-
-                      </div>
-
-
-                      <div
-                        style={{
-                          ...styles.status,
-                          ...statusStyle,
-                        }}
-                      >
-                        {status === "Accepted"
-                          ? "✓ Accepted"
-                          : status === "Rejected"
-                            ? "✕ Rejected"
-                            : "⏳ Pending"}
-                      </div>
-
-                    </div>
-                  );
-                }
-              )}
-
-            </div>
-
-          ) : (
-
-            <div style={styles.emptyBox}>
-
-              <div style={styles.emptyIcon}>
-                📭
+                <p style={styles.sectionSubtitle}>
+                  Track the latest jobs you have applied for.
+                </p>
               </div>
-
-              <h3>
-                No Applications Yet
-              </h3>
-
-              <p>
-                Apply for jobs to see your
-                applications here.
-              </p>
-
             </div>
 
-          )}
+            {stats.recentApplications &&
+            stats.recentApplications.length > 0 ? (
+              stats.recentApplications.map(
+                (application) => (
+                  <div
+                    key={application._id}
+                    style={styles.applicationCard}
+                  >
+                    <div>
+                      <h2 style={styles.jobTitle}>
+                        {application.job?.title}
+                      </h2>
 
-        </section>
+                      <p style={styles.company}>
+                        🏢 {application.job?.company}
+                      </p>
 
-      </main>
+                      <div style={styles.jobInfo}>
+                        <span>
+                          📍 {application.job?.location}
+                        </span>
 
-      <style>{`
+                        <span>
+                          📅{" "}
+                          {new Date(
+                            application.createdAt
+                          ).toLocaleDateString()}
+                        </span>
+                      </div>
+                    </div>
 
-        * {
-          box-sizing: border-box;
-        }
+                    <StatusBadge
+                      status={application.status}
+                    />
+                  </div>
+                )
+              )
+            ) : (
+              <div style={styles.emptyCard}>
+                <div style={styles.emptyIcon}>
+                  📄
+                </div>
 
-        html,
-        body,
-        #root {
-          width: 100%;
-          max-width: 100%;
-          margin: 0;
-          padding: 0;
-          overflow-x: hidden;
-        }
+                <h3 style={styles.emptyTitle}>
+                  No Applications Yet
+                </h3>
 
-        .candidate-dashboard-page {
-          width: 100%;
-          max-width: 100%;
-          overflow-x: hidden;
-        }
+                <p style={styles.emptyText}>
+                  Apply for jobs to see your applications here.
+                </p>
+              </div>
+            )}
+          </div>
 
-        @media (max-width: 900px) {
-          .candidate-dashboard-container {
-            width: calc(100% - 30px) !important;
-          }
-        }
-
-        @media (max-width: 600px) {
-
-          .candidate-dashboard-container {
-            width: calc(100% - 20px) !important;
-            padding-top: 20px !important;
-            padding-bottom: 35px !important;
-          }
-
-          .candidate-dashboard-hero {
-            flex-direction: column !important;
-            align-items: flex-start !important;
-            gap: 13px !important;
-            padding: 20px !important;
-          }
-
-          .candidate-dashboard-hero-icon {
-            width: 50px !important;
-            height: 50px !important;
-            font-size: 23px !important;
-          }
-
-          .candidate-dashboard-hero-title {
-            font-size: 24px !important;
-            line-height: 1.2 !important;
-          }
-
-          .candidate-dashboard-hero-subtitle {
-            font-size: 11px !important;
-            line-height: 1.5 !important;
-          }
-
-          .candidate-stats-grid {
-            grid-template-columns: 1fr !important;
-          }
-
-          .candidate-chart-grid {
-            grid-template-columns: 1fr !important;
-          }
-
-          .candidate-chart-card {
-            min-width: 0 !important;
-            padding: 15px !important;
-          }
-
-          .candidate-bar-chart {
-            height: 220px !important;
-          }
-
-          .candidate-pie-chart {
-            height: 220px !important;
-          }
-
-          .candidate-section-header {
-            flex-direction: column !important;
-            align-items: flex-start !important;
-          }
-
-          .candidate-jobs-grid {
-            grid-template-columns: 1fr !important;
-          }
-
-          .candidate-job-card {
-            min-width: 0 !important;
-            width: 100% !important;
-            padding: 16px !important;
-          }
-
-          .candidate-job-details {
-            grid-template-columns: 1fr !important;
-          }
-
-          .candidate-job-title {
-            font-size: 17px !important;
-            word-break: break-word !important;
-          }
-
-          .candidate-application-card {
-            flex-wrap: wrap !important;
-          }
-
-          .candidate-application-info {
-            min-width: 0 !important;
-            width: calc(100% - 58px) !important;
-          }
-
-          .candidate-status {
-            margin-left: 58px !important;
-          }
-
-        }
-
-        @media (max-width: 380px) {
-
-          .candidate-dashboard-container {
-            width: calc(100% - 14px) !important;
-          }
-
-          .candidate-dashboard-hero {
-            padding: 16px !important;
-          }
-
-          .candidate-dashboard-hero-title {
-            font-size: 21px !important;
-          }
-
-          .candidate-stat-card {
-            padding: 16px !important;
-          }
-
-          .candidate-main-title {
-            font-size: 19px !important;
-          }
-
-        }
-
-      `}</style>
-
-    </div>
+        </div>
+      </div>
+    </>
   );
 }
 
 
-/* =====================================================
+/* =========================
    STAT CARD
-===================================================== */
+========================= */
 
 function StatCard({
   icon,
@@ -786,25 +414,18 @@ function StatCard({
   color,
 }) {
   return (
-    <div
-      className="candidate-stat-card"
-      style={{
-        ...styles.statCard,
-        borderTop: `4px solid ${color}`,
-      }}
-    >
-
+    <div style={styles.statCard}>
       <div
         style={{
           ...styles.statIcon,
-          background: `${color}18`,
+          background: `${color}25`,
+          border: `1px solid ${color}55`,
         }}
       >
         {icon}
       </div>
 
-      <div style={styles.statText}>
-
+      <div>
         <h2 style={styles.statValue}>
           {value}
         </h2>
@@ -812,728 +433,305 @@ function StatCard({
         <p style={styles.statTitle}>
           {title}
         </p>
-
       </div>
-
     </div>
   );
 }
 
 
-/* =====================================================
+/* =========================
+   STATUS BADGE
+========================= */
+
+function StatusBadge({ status }) {
+  const currentStatus =
+    status?.toLowerCase() || "pending";
+
+  let style = styles.pendingStatus;
+
+  if (currentStatus === "accepted") {
+    style = styles.acceptedStatus;
+  }
+
+  if (currentStatus === "rejected") {
+    style = styles.rejectedStatus;
+  }
+
+  return (
+    <span style={style}>
+      ● {status || "Pending"}
+    </span>
+  );
+}
+
+
+/* =========================
    STYLES
-===================================================== */
+========================= */
 
 const styles = {
 
   page: {
-    width: "100%",
-    maxWidth: "100%",
     minHeight: "100vh",
-    overflowX: "hidden",
-
-    background:
-      "linear-gradient(135deg,#eef4ff,#f8fafc,#f5f3ff)",
-
-    fontFamily:
-      "'Segoe UI', Arial, sans-serif",
-
-    color: "#172554",
+    background: "#24232A",
+    color: "#F5F3FF",
+    padding: "40px 20px 80px",
   },
-
 
   container: {
-    width:
-      "min(1180px, calc(100% - 40px))",
-
-    maxWidth: "100%",
-
+    width: "100%",
+    maxWidth: "1200px",
     margin: "0 auto",
-
-    padding: "35px 0 60px",
-
-    minWidth: 0,
   },
 
-
-  /* HERO */
-
-  hero: {
-    display: "flex",
-
-    alignItems: "center",
-
-    gap: "18px",
-
-    padding: "25px",
-
-    marginBottom: "25px",
-
-    borderRadius: "18px",
-
-    background:
-      "linear-gradient(135deg,#1e3a8a,#2563eb,#7c3aed)",
-
-    color: "white",
-
-    boxShadow:
-      "0 15px 35px rgba(37,99,235,0.25)",
-
-    minWidth: 0,
-
-    overflow: "hidden",
+  header: {
+    marginBottom: "40px",
   },
 
-
-  heroIcon: {
-    width: "62px",
-    height: "62px",
-
-    borderRadius: "16px",
-
-    background:
-      "rgba(255,255,255,0.16)",
-
-    display: "flex",
-
-    alignItems: "center",
-
-    justifyContent: "center",
-
-    fontSize: "28px",
-
-    flexShrink: 0,
-  },
-
-
-  heroContent: {
-    minWidth: 0,
-    flex: 1,
-  },
-
-
-  heroTitle: {
+  welcome: {
     margin: 0,
-
-    fontSize: "30px",
-
-    fontWeight: "800",
-
-    overflowWrap: "break-word",
-  },
-
-
-  heroSubtitle: {
-    margin: "5px 0 0",
-
-    color:
-      "rgba(255,255,255,0.82)",
-
+    color: "#A78BFA",
     fontSize: "13px",
-
-    lineHeight: 1.5,
-
-    overflowWrap: "break-word",
+    fontWeight: "800",
+    letterSpacing: "1.5px",
   },
 
+  title: {
+    margin: "8px 0",
+    color: "#F5F3FF",
+    fontSize: "42px",
+    fontWeight: "800",
+  },
 
-  /* STATS */
+  subtitle: {
+    margin: 0,
+    color: "#A9A6B8",
+    fontSize: "16px",
+  },
 
   statsGrid: {
     display: "grid",
-
     gridTemplateColumns:
-      "repeat(auto-fit,minmax(180px,1fr))",
-
-    gap: "15px",
-
-    marginBottom: "25px",
-
-    minWidth: 0,
+      "repeat(auto-fit, minmax(200px, 1fr))",
+    gap: "18px",
+    marginBottom: "50px",
   },
-
 
   statCard: {
-    background: "white",
-
-    padding: "20px",
-
-    borderRadius: "15px",
-
+    background: "#302E36",
+    border: "1px solid #46414F",
+    borderRadius: "16px",
+    padding: "22px",
     display: "flex",
-
     alignItems: "center",
-
-    gap: "14px",
-
+    gap: "15px",
     boxShadow:
-      "0 5px 20px rgba(15,23,42,0.08)",
-
-    minWidth: 0,
+      "0 8px 25px rgba(0,0,0,0.18)",
   },
-
 
   statIcon: {
-    width: "45px",
-    height: "45px",
-
-    borderRadius: "12px",
-
+    width: "52px",
+    height: "52px",
+    borderRadius: "14px",
     display: "flex",
-
     alignItems: "center",
-
     justifyContent: "center",
-
-    fontSize: "20px",
-
-    flexShrink: 0,
+    fontSize: "24px",
   },
-
-
-  statText: {
-    minWidth: 0,
-  },
-
 
   statValue: {
     margin: 0,
-
-    fontSize: "27px",
-
+    color: "#F5F3FF",
+    fontSize: "28px",
     fontWeight: "800",
-
-    color: "#172554",
   },
-
 
   statTitle: {
     margin: "3px 0 0",
-
-    color: "#64748b",
-
-    fontSize: "12px",
-
-    fontWeight: "600",
+    color: "#A9A6B8",
+    fontSize: "14px",
   },
 
+  sectionHeader: {
+    marginBottom: "20px",
+  },
 
-  /* CHARTS */
+  sectionTitle: {
+    margin: 0,
+    color: "#F5F3FF",
+    fontSize: "25px",
+  },
+
+  sectionSubtitle: {
+    margin: "6px 0 0",
+    color: "#A9A6B8",
+    fontSize: "14px",
+  },
 
   chartGrid: {
     display: "grid",
-
     gridTemplateColumns:
-      "repeat(2,minmax(0,1fr))",
-
-    gap: "20px",
-
-    marginBottom: "35px",
-
-    minWidth: 0,
+      "repeat(auto-fit, minmax(420px, 1fr))",
+    gap: "24px",
+    marginBottom: "60px",
   },
-
 
   chartCard: {
-    background: "white",
-
-    padding: "22px",
-
+    background: "#302E36",
+    border: "1px solid #46414F",
+    padding: "25px",
     borderRadius: "16px",
-
     boxShadow:
-      "0 5px 20px rgba(15,23,42,0.08)",
-
-    minWidth: 0,
-
-    overflow: "hidden",
+      "0 8px 25px rgba(0,0,0,0.18)",
   },
 
-
-  sectionTitle: {
-    margin: "0 0 16px",
-
+  chartTitle: {
     textAlign: "center",
-
-    fontSize: "17px",
-
-    color: "#172554",
+    margin: "0 0 25px",
+    color: "#F5F3FF",
+    fontSize: "20px",
   },
 
-
-  barChartWrap: {
-    width: "100%",
-
-    height: "270px",
-
-    position: "relative",
+  jobsSection: {
+    marginTop: "60px",
   },
-
-
-  pieChartWrap: {
-    width: "100%",
-
-    maxWidth: "300px",
-
-    height: "270px",
-
-    margin: "0 auto",
-
-    position: "relative",
-  },
-
-
-  /* SECTIONS */
-
-  section: {
-    marginTop: "35px",
-
-    minWidth: 0,
-  },
-
-
-  sectionHeader: {
-    display: "flex",
-
-    justifyContent: "space-between",
-
-    alignItems: "center",
-
-    gap: "15px",
-
-    marginBottom: "18px",
-
-    minWidth: 0,
-  },
-
-
-  sectionHeadingBlock: {
-    minWidth: 0,
-  },
-
-
-  mainSectionTitle: {
-    margin: 0,
-
-    fontSize: "22px",
-
-    fontWeight: "800",
-
-    color: "#172554",
-
-    overflowWrap: "break-word",
-  },
-
-
-  sectionSubtitle: {
-    margin: "5px 0 0",
-
-    color: "#64748b",
-
-    fontSize: "12px",
-  },
-
-
-  viewAllButton: {
-    border: "none",
-
-    background: "#eff6ff",
-
-    color: "#2563eb",
-
-    padding: "9px 14px",
-
-    borderRadius: "8px",
-
-    fontWeight: "700",
-
-    cursor: "pointer",
-
-    flexShrink: 0,
-  },
-
-
-  /* JOBS */
-
-  jobsGrid: {
-    display: "grid",
-
-    gridTemplateColumns:
-      "repeat(auto-fit,minmax(320px,1fr))",
-
-    gap: "20px",
-
-    minWidth: 0,
-  },
-
 
   jobCard: {
-    background: "white",
-
-    padding: "22px",
-
+    background: "#302E36",
+    border: "1px solid #46414F",
+    padding: "25px",
     borderRadius: "16px",
-
+    marginBottom: "18px",
     boxShadow:
-      "0 7px 25px rgba(15,23,42,0.09)",
-
-    border:
-      "1px solid #e2e8f0",
-
-    minWidth: 0,
-
-    overflow: "hidden",
+      "0 8px 25px rgba(0,0,0,0.18)",
   },
-
 
   jobTop: {
     display: "flex",
-
-    alignItems: "center",
-
-    gap: "12px",
-
-    minWidth: 0,
+    justifyContent: "space-between",
+    gap: "20px",
+    alignItems: "flex-start",
   },
-
-
-  jobIcon: {
-    width: "48px",
-    height: "48px",
-
-    borderRadius: "12px",
-
-    background: "#eff6ff",
-
-    display: "flex",
-
-    alignItems: "center",
-
-    justifyContent: "center",
-
-    fontSize: "22px",
-
-    flexShrink: 0,
-  },
-
-
-  jobHeading: {
-    minWidth: 0,
-
-    flex: 1,
-  },
-
 
   jobTitle: {
     margin: 0,
-
-    fontSize: "18px",
-
-    color: "#172554",
-
-    wordBreak: "break-word",
+    color: "#F5F3FF",
+    fontSize: "21px",
   },
-
 
   company: {
-    margin: "4px 0 0",
-
-    color: "#64748b",
-
-    fontSize: "12px",
-
-    wordBreak: "break-word",
+    margin: "7px 0 0",
+    color: "#A9A6B8",
   },
 
-
-  jobDetails: {
-    display: "grid",
-
-    gridTemplateColumns:
-      "repeat(2,minmax(0,1fr))",
-
-    gap: "8px",
-
-    marginTop: "16px",
-
-    minWidth: 0,
-  },
-
-
-  jobDetailBox: {
-    background: "#f8fafc",
-
-    borderRadius: "9px",
-
-    padding: "10px",
-
-    minWidth: 0,
-  },
-
-
-  matchBox: {
-    marginTop: "18px",
-
-    padding: "13px",
-
-    background: "#f8fafc",
-
-    borderRadius: "10px",
-  },
-
-
-  matchHeader: {
+  jobInfo: {
     display: "flex",
-
-    justifyContent: "space-between",
-
-    gap: "10px",
-
-    fontSize: "12px",
-
-    marginBottom: "8px",
+    gap: "20px",
+    flexWrap: "wrap",
+    marginTop: "18px",
+    color: "#A9A6B8",
+    fontSize: "14px",
   },
 
-
-  progressBackground: {
-    height: "7px",
-
-    background: "#e2e8f0",
-
-    borderRadius: "20px",
-
-    overflow: "hidden",
+  scoreBox: {
+    minWidth: "75px",
+    textAlign: "center",
+    padding: "10px",
+    borderRadius: "12px",
+    background: "#3A2E52",
+    border: "1px solid #6D4BC4",
+    color: "#C4B5FD",
+    fontWeight: "800",
+    fontSize: "18px",
   },
-
-
-  progress: {
-    height: "100%",
-
-    borderRadius: "20px",
-
-    background:
-      "linear-gradient(90deg,#2563eb,#7c3aed)",
-
-    transition:
-      "width 0.4s ease",
-  },
-
-
-  skillsBox: {
-    marginTop: "15px",
-
-    fontSize: "12px",
-  },
-
 
   skills: {
-    display: "flex",
-
-    flexWrap: "wrap",
-
-    gap: "6px",
-
-    marginTop: "8px",
+    marginTop: "18px",
+    color: "#A9A6B8",
   },
-
-
-  skill: {
-    padding: "5px 9px",
-
-    borderRadius: "15px",
-
-    background: "#eff6ff",
-
-    color: "#2563eb",
-
-    fontSize: "10px",
-
-    fontWeight: "600",
-
-    maxWidth: "100%",
-
-    overflowWrap: "break-word",
-  },
-
-
-  noSkills: {
-    color: "#64748b",
-
-    fontSize: "12px",
-  },
-
 
   applyButton: {
-    width: "100%",
-
-    marginTop: "18px",
-
-    height: "43px",
-
-    border: "none",
-
-    borderRadius: "9px",
-
+    marginTop: "20px",
+    padding: "12px 24px",
     background:
-      "linear-gradient(135deg,#2563eb,#7c3aed)",
-
-    color: "white",
-
-    fontWeight: "700",
-
+      "linear-gradient(135deg, #8B5CF6, #A855F7)",
+    color: "#FFFFFF",
+    border: "none",
+    borderRadius: "10px",
     cursor: "pointer",
-
-    fontSize: "13px",
+    fontWeight: "700",
+    fontSize: "14px",
+    boxShadow:
+      "0 6px 18px rgba(139,92,246,0.25)",
   },
-
-
-  /* APPLICATIONS */
-
-  applicationList: {
-    display: "flex",
-
-    flexDirection: "column",
-
-    gap: "12px",
-
-    minWidth: 0,
-  },
-
 
   applicationCard: {
-    background: "white",
-
-    padding: "17px",
-
-    borderRadius: "14px",
-
-    display: "flex",
-
-    alignItems: "center",
-
-    gap: "13px",
-
-    boxShadow:
-      "0 5px 18px rgba(15,23,42,0.07)",
-
-    border:
-      "1px solid #e2e8f0",
-
-    minWidth: 0,
-
-    overflow: "hidden",
-  },
-
-
-  applicationIcon: {
-    width: "45px",
-    height: "45px",
-
-    borderRadius: "11px",
-
-    background: "#eff6ff",
-
-    display: "flex",
-
-    alignItems: "center",
-
-    justifyContent: "center",
-
-    fontSize: "20px",
-
-    flexShrink: 0,
-  },
-
-
-  applicationInfo: {
-    flex: 1,
-
-    minWidth: 0,
-
-    overflow: "hidden",
-  },
-
-
-  status: {
-    padding: "7px 12px",
-
-    borderRadius: "20px",
-
-    fontSize: "11px",
-
-    fontWeight: "700",
-
-    whiteSpace: "nowrap",
-
-    flexShrink: 0,
-  },
-
-
-  accepted: {
-    background: "#dcfce7",
-
-    color: "#15803d",
-  },
-
-
-  rejected: {
-    background: "#fee2e2",
-
-    color: "#dc2626",
-  },
-
-
-  pending: {
-    background: "#fef3c7",
-
-    color: "#d97706",
-  },
-
-
-  /* EMPTY */
-
-  emptyBox: {
-    background: "white",
-
-    padding: "45px 25px",
-
+    background: "#302E36",
+    border: "1px solid #46414F",
+    padding: "25px",
     borderRadius: "16px",
-
-    textAlign: "center",
-
+    marginBottom: "18px",
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    gap: "20px",
     boxShadow:
-      "0 5px 20px rgba(15,23,42,0.07)",
-
-    overflow: "hidden",
+      "0 8px 25px rgba(0,0,0,0.18)",
   },
 
+  acceptedStatus: {
+    padding: "8px 14px",
+    borderRadius: "20px",
+    background: "rgba(34,197,94,0.15)",
+    border: "1px solid rgba(34,197,94,0.4)",
+    color: "#4ADE80",
+    fontWeight: "700",
+    whiteSpace: "nowrap",
+  },
+
+  rejectedStatus: {
+    padding: "8px 14px",
+    borderRadius: "20px",
+    background: "rgba(239,68,68,0.15)",
+    border: "1px solid rgba(239,68,68,0.4)",
+    color: "#FCA5A5",
+    fontWeight: "700",
+    whiteSpace: "nowrap",
+  },
+
+  pendingStatus: {
+    padding: "8px 14px",
+    borderRadius: "20px",
+    background: "rgba(168,85,247,0.15)",
+    border: "1px solid rgba(168,85,247,0.4)",
+    color: "#C4B5FD",
+    fontWeight: "700",
+    whiteSpace: "nowrap",
+  },
+
+  emptyCard: {
+    background: "#302E36",
+    border: "1px solid #46414F",
+    borderRadius: "16px",
+    padding: "45px 25px",
+    textAlign: "center",
+    boxShadow:
+      "0 8px 25px rgba(0,0,0,0.18)",
+  },
 
   emptyIcon: {
     fontSize: "42px",
-
-    marginBottom: "8px",
+    marginBottom: "10px",
   },
 
-
-  /* LOADING */
-
-  loading: {
-    minHeight: "80vh",
-
-    display: "flex",
-
-    flexDirection: "column",
-
-    alignItems: "center",
-
-    justifyContent: "center",
-
-    color: "#172554",
+  emptyTitle: {
+    margin: "5px 0",
+    color: "#F5F3FF",
   },
 
-
-  loadingIcon: {
-    fontSize: "40px",
+  emptyText: {
+    margin: 0,
+    color: "#A9A6B8",
   },
 };
 

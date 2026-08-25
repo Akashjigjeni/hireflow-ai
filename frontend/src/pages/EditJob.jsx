@@ -18,17 +18,6 @@ function EditJob() {
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
 
-  useEffect(() => {
-    // Always start this page from the top
-    window.scrollTo({
-      top: 0,
-      left: 0,
-      behavior: "auto",
-    });
-
-    fetchJob();
-  }, [id]);
-
   const fetchJob = async () => {
     try {
       setLoading(true);
@@ -47,12 +36,22 @@ function EditJob() {
 
       alert(
         err.response?.data?.message ||
-        "Failed to load job"
+          "Failed to load job"
       );
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: "auto",
+    });
+
+    fetchJob();
+  }, [id]);
 
   const handleChange = (e) => {
     setJob({
@@ -77,7 +76,7 @@ function EditJob() {
 
       alert(
         err.response?.data?.message ||
-        "Failed to update job"
+          "Failed to update job"
       );
     } finally {
       setUpdating(false);
@@ -90,13 +89,17 @@ function EditJob() {
         <Navbar />
 
         <div style={styles.loadingPage}>
-          <div style={styles.loadingIcon}>
-            ⏳
+          <div style={styles.loadingCard}>
+            <div style={styles.loadingIcon}>⏳</div>
+
+            <h2 style={styles.loadingTitle}>
+              Loading Job...
+            </h2>
+
+            <p style={styles.loadingText}>
+              Please wait while we load the job details.
+            </p>
           </div>
-
-          <h2>Loading Job...</h2>
-
-          <p>Please wait while we load the job details.</p>
         </div>
       </>
     );
@@ -108,10 +111,7 @@ function EditJob() {
 
       <main style={styles.container}>
 
-        {/* =========================
-            HEADER
-        ========================= */}
-
+        {/* HERO */}
         <section style={styles.hero}>
 
           <div style={styles.heroIcon}>
@@ -119,8 +119,9 @@ function EditJob() {
           </div>
 
           <div style={styles.heroContent}>
+
             <div style={styles.badge}>
-              JOB MANAGEMENT
+              EMPLOYER RECRUITMENT
             </div>
 
             <h1 style={styles.heroTitle}>
@@ -128,30 +129,27 @@ function EditJob() {
             </h1>
 
             <p style={styles.heroSubtitle}>
-              Update your job posting information
-              below.
+              Update your job posting and keep your
+              opportunity information accurate.
             </p>
+
           </div>
 
         </section>
 
 
-        {/* =========================
-            FORM CARD
-        ========================= */}
-
+        {/* FORM CARD */}
         <section style={styles.card}>
 
           <div style={styles.cardHeader}>
 
             <div>
               <h2 style={styles.cardTitle}>
-                Job Information
+                📄 Job Information
               </h2>
 
               <p style={styles.cardSubtitle}>
-                Make changes to your job posting
-                and save them.
+                Update the details of your job posting.
               </p>
             </div>
 
@@ -167,142 +165,114 @@ function EditJob() {
             <div style={styles.grid}>
 
               {/* JOB TITLE */}
-
               <div style={styles.field}>
+
                 <label style={styles.label}>
-                  Job Title
+                  💼 Job Title
                 </label>
 
-                <div style={styles.inputWrapper}>
-                  <span style={styles.icon}>
-                    💼
-                  </span>
+                <input
+                  type="text"
+                  name="title"
+                  value={job.title}
+                  onChange={handleChange}
+                  placeholder="e.g. React Developer"
+                  required
+                  style={styles.input}
+                />
 
-                  <input
-                    type="text"
-                    name="title"
-                    value={job.title}
-                    onChange={handleChange}
-                    placeholder="e.g. React Developer"
-                    required
-                    style={styles.input}
-                  />
-                </div>
               </div>
 
 
               {/* COMPANY */}
-
               <div style={styles.field}>
+
                 <label style={styles.label}>
-                  Company
+                  🏢 Company
                 </label>
 
-                <div style={styles.inputWrapper}>
-                  <span style={styles.icon}>
-                    🏢
-                  </span>
+                <input
+                  type="text"
+                  name="company"
+                  value={job.company}
+                  onChange={handleChange}
+                  placeholder="Company name"
+                  required
+                  style={styles.input}
+                />
 
-                  <input
-                    type="text"
-                    name="company"
-                    value={job.company}
-                    onChange={handleChange}
-                    placeholder="Company name"
-                    required
-                    style={styles.input}
-                  />
-                </div>
               </div>
 
 
               {/* LOCATION */}
-
               <div style={styles.field}>
+
                 <label style={styles.label}>
-                  Location
+                  📍 Location
                 </label>
 
-                <div style={styles.inputWrapper}>
-                  <span style={styles.icon}>
-                    📍
-                  </span>
+                <input
+                  type="text"
+                  name="location"
+                  value={job.location}
+                  onChange={handleChange}
+                  placeholder="e.g. Pune"
+                  required
+                  style={styles.input}
+                />
 
-                  <input
-                    type="text"
-                    name="location"
-                    value={job.location}
-                    onChange={handleChange}
-                    placeholder="e.g. Pune"
-                    required
-                    style={styles.input}
-                  />
-                </div>
               </div>
 
 
               {/* SALARY */}
-
               <div style={styles.field}>
+
                 <label style={styles.label}>
-                  Salary Range
+                  💰 Salary Range
                 </label>
 
-                <div style={styles.inputWrapper}>
-                  <span style={styles.icon}>
-                    💰
-                  </span>
+                <input
+                  type="text"
+                  name="salaryRange"
+                  value={job.salaryRange}
+                  onChange={handleChange}
+                  placeholder="e.g. ₹5 - ₹8 LPA"
+                  required
+                  style={styles.input}
+                />
 
-                  <input
-                    type="text"
-                    name="salaryRange"
-                    value={job.salaryRange}
-                    onChange={handleChange}
-                    placeholder="e.g. ₹5 - ₹8 LPA"
-                    required
-                    style={styles.input}
-                  />
-                </div>
               </div>
 
 
               {/* DESCRIPTION */}
-
               <div style={styles.fullField}>
+
                 <label style={styles.label}>
-                  Job Description
+                  📝 Job Description
                 </label>
 
-                <div style={styles.textareaWrapper}>
+                <textarea
+                  rows="8"
+                  name="description"
+                  value={job.description}
+                  onChange={handleChange}
+                  placeholder="Write a clear description of the role, responsibilities and requirements..."
+                  required
+                  style={styles.textarea}
+                />
 
-                  <textarea
-                    rows="7"
-                    name="description"
-                    value={job.description}
-                    onChange={handleChange}
-                    placeholder="Write a clear description of the role, responsibilities and requirements..."
-                    required
-                    style={styles.textarea}
-                  />
-
-                </div>
               </div>
 
             </div>
 
 
-            {/* =========================
-                ACTIONS
-            ========================= */}
-
+            {/* ACTIONS */}
             <div style={styles.actions}>
 
               <button
                 type="button"
                 onClick={() =>
-                  navigate(
-                    "/employer-dashboard"
-                  )
+                  navigate("/employer-dashboard")
                 }
                 disabled={updating}
                 style={styles.cancelButton}
@@ -316,6 +286,9 @@ function EditJob() {
                 style={{
                   ...styles.updateButton,
                   opacity: updating ? 0.7 : 1,
+                  cursor: updating
+                    ? "not-allowed"
+                    : "pointer",
                 }}
               >
                 {updating
@@ -330,10 +303,7 @@ function EditJob() {
         </section>
 
 
-        {/* =========================
-            TIP
-        ========================= */}
-
+        {/* TIP */}
         <div style={styles.tip}>
 
           <div style={styles.tipIcon}>
@@ -341,14 +311,14 @@ function EditJob() {
           </div>
 
           <div>
-            <strong>
-              Tip
+            <strong style={styles.tipTitle}>
+              Quick Tip
             </strong>
 
-            <p>
-              Keep the job title, salary,
-              location and description clear
-              to attract better candidates.
+            <p style={styles.tipText}>
+              Keep the job title, salary, location and
+              description clear to attract better
+              candidates.
             </p>
           </div>
 
@@ -357,42 +327,26 @@ function EditJob() {
       </main>
 
 
-      {/* =========================
-          RESPONSIVE CSS
-      ========================= */}
-
       <style>{`
 
         * {
           box-sizing: border-box;
         }
 
-        html,
-        body,
-        #root {
-          margin: 0;
-          width: 100%;
-          max-width: 100%;
-          overflow-x: hidden;
-        }
-
         @media (max-width: 700px) {
 
           .edit-job-container {
-            width:
-              calc(100% - 24px) !important;
-
+            width: calc(100% - 24px) !important;
             padding-top: 20px !important;
-            padding-bottom: 30px !important;
+            padding-bottom: 35px !important;
           }
 
           .edit-job-hero {
             padding: 20px !important;
-            gap: 12px !important;
           }
 
-          .edit-job-hero-title {
-            font-size: 24px !important;
+          .edit-job-title {
+            font-size: 28px !important;
           }
 
           .edit-job-card {
@@ -411,8 +365,8 @@ function EditJob() {
             width: 100% !important;
           }
 
-          .edit-job-tip {
-            align-items: flex-start !important;
+          .edit-job-card-header {
+            flex-direction: column !important;
           }
 
         }
@@ -424,38 +378,27 @@ function EditJob() {
 }
 
 
-/* =====================================================
+/* =========================================
    STYLES
-===================================================== */
+========================================= */
 
 const styles = {
 
   page: {
-    width: "100%",
     minHeight: "100vh",
-
+    width: "100%",
     background:
-      "linear-gradient(135deg,#eef4ff,#f8fafc,#f5f3ff)",
-
-    color: "#172554",
-
+      "linear-gradient(135deg, #24232a 0%, #1f1e25 50%, #292535 100%)",
+    color: "#f5f3ff",
     fontFamily:
-      "'Segoe UI', Arial, sans-serif",
+      "system-ui, 'Segoe UI', Roboto, Arial, sans-serif",
   },
 
 
   container: {
-    width:
-      "min(950px, calc(100% - 40px))",
-
-    maxWidth: "100%",
-
+    width: "min(1180px, calc(100% - 40px))",
     margin: "0 auto",
-
-    padding: "30px 0 50px",
-
-    minWidth: 0,
-
+    padding: "38px 0 60px",
   },
 
 
@@ -463,172 +406,160 @@ const styles = {
 
   hero: {
     display: "flex",
-
     alignItems: "center",
-
-    gap: "18px",
-
-    padding: "25px",
-
-    marginBottom: "22px",
-
-    borderRadius: "18px",
+    gap: "22px",
+    padding: "30px 34px",
+    marginBottom: "28px",
+    borderRadius: "22px",
 
     background:
-      "linear-gradient(135deg,#1e3a8a,#2563eb,#7c3aed)",
+      "linear-gradient(135deg, #263a73 0%, #315bc4 55%, #7c3aed 100%)",
 
-    color: "white",
+    border:
+      "1px solid rgba(167,139,250,0.35)",
 
     boxShadow:
-      "0 15px 35px rgba(37,99,235,.2)",
-
-    minWidth: 0,
+      "0 18px 45px rgba(0,0,0,0.35)",
 
     overflow: "hidden",
   },
 
 
   heroIcon: {
-    width: "58px",
-
-    height: "58px",
-
-    borderRadius: "15px",
+    width: "78px",
+    height: "78px",
 
     display: "flex",
-
     alignItems: "center",
-
     justifyContent: "center",
 
+    borderRadius: "20px",
+
     background:
-      "rgba(255,255,255,.15)",
+      "rgba(255,255,255,0.12)",
 
-    fontSize: "26px",
+    border:
+      "1px solid rgba(255,255,255,0.15)",
 
+    fontSize: "34px",
     flexShrink: 0,
   },
 
 
   heroContent: {
     minWidth: 0,
-
-    flex: 1,
   },
 
 
   badge: {
     display: "inline-block",
 
-    padding: "5px 9px",
+    padding: "7px 13px",
+    marginBottom: "10px",
 
-    borderRadius: "20px",
+    borderRadius: "30px",
 
     background:
-      "rgba(255,255,255,.13)",
+      "rgba(255,255,255,0.10)",
 
     border:
-      "1px solid rgba(255,255,255,.2)",
+      "1px solid rgba(255,255,255,0.20)",
 
-    fontSize: "9px",
+    color: "#e9ddff",
 
-    fontWeight: "700",
-
-    letterSpacing: "1px",
-
-    marginBottom: "7px",
+    fontSize: "10px",
+    fontWeight: "800",
+    letterSpacing: "1.2px",
   },
 
 
   heroTitle: {
     margin: 0,
 
-    fontSize: "29px",
+    color: "#ffffff",
 
+    fontSize: "38px",
     fontWeight: "800",
+    letterSpacing: "-0.5px",
   },
 
 
   heroSubtitle: {
-    margin: "5px 0 0",
+    margin: "8px 0 0",
 
-    color:
-      "rgba(255,255,255,.8)",
+    color: "#d7d3e6",
 
-    fontSize: "13px",
-
-    lineHeight: "1.5",
+    fontSize: "15px",
   },
 
 
-  /* CARD */
+  /* MAIN CARD */
 
   card: {
-    background: "white",
+    padding: "34px",
 
-    padding: "30px",
+    borderRadius: "22px",
 
-    borderRadius: "18px",
+    background:
+      "linear-gradient(145deg, #302e36, #29272f)",
 
     border:
-      "1px solid #e2e8f0",
+      "1px solid #46414f",
 
     boxShadow:
-      "0 10px 30px rgba(15,23,42,.08)",
-
-    minWidth: 0,
+      "0 18px 45px rgba(0,0,0,0.30)",
   },
 
 
   cardHeader: {
     display: "flex",
 
+    alignItems: "flex-start",
     justifyContent: "space-between",
 
-    alignItems: "flex-start",
+    gap: "20px",
 
-    gap: "15px",
-
-    paddingBottom: "20px",
-
-    marginBottom: "24px",
+    paddingBottom: "24px",
+    marginBottom: "28px",
 
     borderBottom:
-      "1px solid #e2e8f0",
+      "1px solid #46414f",
   },
 
 
   cardTitle: {
     margin: 0,
 
-    fontSize: "21px",
+    color: "#f5f3ff",
 
+    fontSize: "25px",
     fontWeight: "800",
-
-    color: "#172554",
   },
 
 
   cardSubtitle: {
-    margin: "5px 0 0",
+    margin: "7px 0 0",
 
-    color: "#64748b",
+    color: "#a9a6b8",
 
-    fontSize: "12px",
+    fontSize: "14px",
   },
 
 
   editBadge: {
-    padding: "7px 11px",
+    padding: "9px 15px",
 
-    borderRadius: "20px",
+    borderRadius: "25px",
 
-    background: "#eff6ff",
+    background:
+      "rgba(139,92,246,0.14)",
 
-    color: "#2563eb",
+    border:
+      "1px solid rgba(139,92,246,0.35)",
 
-    fontSize: "10px",
+    color: "#c4b5fd",
 
+    fontSize: "12px",
     fontWeight: "700",
 
     whiteSpace: "nowrap",
@@ -641,11 +572,9 @@ const styles = {
     display: "grid",
 
     gridTemplateColumns:
-      "1fr 1fr",
+      "repeat(2, minmax(0, 1fr))",
 
-    gap: "20px",
-
-    minWidth: 0,
+    gap: "22px",
   },
 
 
@@ -656,108 +585,71 @@ const styles = {
 
   fullField: {
     gridColumn: "1 / -1",
-
-    minWidth: 0,
   },
 
 
   label: {
     display: "block",
 
-    marginBottom: "7px",
+    marginBottom: "9px",
 
-    color: "#334155",
+    color: "#d8d5e2",
 
-    fontSize: "12px",
-
+    fontSize: "13px",
     fontWeight: "700",
-  },
-
-
-  inputWrapper: {
-    height: "47px",
-
-    display: "flex",
-
-    alignItems: "center",
-
-    gap: "9px",
-
-    padding: "0 12px",
-
-    border:
-      "1px solid #dbe3ef",
-
-    borderRadius: "10px",
-
-    background: "#f8fafc",
-
-    overflow: "hidden",
-
-    transition: ".2s",
-  },
-
-
-  icon: {
-    flexShrink: 0,
-
-    fontSize: "15px",
   },
 
 
   input: {
     width: "100%",
+    height: "54px",
 
-    minWidth: 0,
+    padding: "0 16px",
 
-    height: "100%",
+    borderRadius: "12px",
 
-    border: "none",
+    border:
+      "1px solid #46414f",
 
     outline: "none",
 
-    background: "transparent",
+    background:
+      "#24232a",
 
-    color: "#172554",
+    color: "#f5f3ff",
 
-    fontSize: "13px",
-  },
+    fontSize: "14px",
 
-
-  textareaWrapper: {
-    padding: "10px 12px",
-
-    border:
-      "1px solid #dbe3ef",
-
-    borderRadius: "10px",
-
-    background: "#f8fafc",
-
+    transition:
+      "border 0.2s ease, box-shadow 0.2s ease",
   },
 
 
   textarea: {
     width: "100%",
+    minHeight: "180px",
 
-    border: "none",
+    padding: "15px 16px",
+
+    borderRadius: "12px",
+
+    border:
+      "1px solid #46414f",
 
     outline: "none",
 
     resize: "vertical",
 
-    minHeight: "150px",
+    background:
+      "#24232a",
 
-    background: "transparent",
+    color: "#f5f3ff",
 
-    color: "#172554",
+    fontSize: "14px",
+    lineHeight: "1.6",
 
     fontFamily:
-      "'Segoe UI', Arial, sans-serif",
-
-    fontSize: "13px",
-
-    lineHeight: "1.6",
+      "inherit",
   },
 
 
@@ -768,31 +660,31 @@ const styles = {
 
     justifyContent: "flex-end",
 
-    gap: "12px",
+    gap: "14px",
 
-    marginTop: "28px",
-
-    paddingTop: "22px",
+    marginTop: "30px",
+    paddingTop: "25px",
 
     borderTop:
-      "1px solid #e2e8f0",
+      "1px solid #46414f",
   },
 
 
   cancelButton: {
-    minWidth: "120px",
-
-    height: "45px",
+    minWidth: "130px",
+    height: "48px",
 
     border:
-      "1px solid #cbd5e1",
+      "1px solid #55505f",
 
-    borderRadius: "9px",
+    borderRadius: "10px",
 
-    background: "white",
+    background:
+      "#302e36",
 
-    color: "#475569",
+    color: "#c8c4d4",
 
+    fontSize: "14px",
     fontWeight: "700",
 
     cursor: "pointer",
@@ -800,25 +692,23 @@ const styles = {
 
 
   updateButton: {
-    minWidth: "160px",
-
-    height: "45px",
+    minWidth: "175px",
+    height: "48px",
 
     border: "none",
 
-    borderRadius: "9px",
+    borderRadius: "10px",
 
     background:
-      "linear-gradient(135deg,#2563eb,#7c3aed)",
+      "linear-gradient(135deg, #7c3aed, #a855f7)",
 
-    color: "white",
+    color: "#ffffff",
 
-    fontWeight: "700",
-
-    cursor: "pointer",
+    fontSize: "14px",
+    fontWeight: "800",
 
     boxShadow:
-      "0 8px 18px rgba(37,99,235,.2)",
+      "0 10px 25px rgba(139,92,246,0.28)",
   },
 
 
@@ -829,71 +719,113 @@ const styles = {
 
     alignItems: "center",
 
-    gap: "13px",
+    gap: "15px",
 
-    marginTop: "18px",
+    marginTop: "22px",
+    padding: "18px 20px",
 
-    padding: "15px 18px",
-
-    borderRadius: "12px",
+    borderRadius: "16px",
 
     background:
-      "linear-gradient(135deg,#eef4ff,#f5f3ff)",
+      "rgba(139,92,246,0.08)",
 
     border:
-      "1px solid #dbeafe",
+      "1px solid rgba(139,92,246,0.22)",
   },
 
 
   tipIcon: {
-    width: "38px",
-
-    height: "38px",
+    width: "48px",
+    height: "48px",
 
     display: "flex",
 
     alignItems: "center",
-
     justifyContent: "center",
 
-    borderRadius: "9px",
-
-    background: "white",
-
-    fontSize: "18px",
-
     flexShrink: 0,
+
+    borderRadius: "13px",
+
+    background:
+      "rgba(139,92,246,0.18)",
+
+    fontSize: "22px",
+  },
+
+
+  tipTitle: {
+    color: "#e9ddff",
+
+    fontSize: "14px",
+  },
+
+
+  tipText: {
+    margin: "4px 0 0",
+
+    color: "#a9a6b8",
+
+    fontSize: "13px",
+    lineHeight: "1.6",
   },
 
 
   /* LOADING */
 
   loadingPage: {
-    minHeight:
-      "calc(100vh - 80px)",
+    minHeight: "calc(100vh - 80px)",
 
     display: "flex",
 
-    flexDirection: "column",
-
     alignItems: "center",
+    justifyContent: "center",
 
-    justifyContent: "flex-start",
-
-    paddingTop: "80px",
-
-    color: "#172554",
+    padding: "30px",
 
     background:
-      "linear-gradient(135deg,#eef4ff,#f8fafc,#f5f3ff)",
+      "linear-gradient(135deg, #24232a, #1f1e25)",
+  },
+
+
+  loadingCard: {
+    textAlign: "center",
+
+    padding: "45px 55px",
+
+    borderRadius: "22px",
+
+    background:
+      "#302e36",
+
+    border:
+      "1px solid #46414f",
+
+    boxShadow:
+      "0 20px 50px rgba(0,0,0,0.35)",
   },
 
 
   loadingIcon: {
-    fontSize: "40px",
+    fontSize: "42px",
 
-    marginBottom: "8px",
+    marginBottom: "10px",
   },
+
+
+  loadingTitle: {
+    margin: "0 0 8px",
+
+    color: "#f5f3ff",
+  },
+
+
+  loadingText: {
+    margin: 0,
+
+    color: "#a9a6b8",
+  },
+
 };
 
 export default EditJob;

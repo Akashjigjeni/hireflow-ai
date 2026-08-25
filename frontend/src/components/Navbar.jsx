@@ -25,10 +25,7 @@ function Navbar() {
   return (
     <nav className="hireflow-navbar">
 
-      {/* =========================
-          LOGO
-      ========================= */}
-
+      {/* LOGO */}
       <Link
         to="/"
         className="hireflow-logo"
@@ -44,54 +41,34 @@ function Navbar() {
         </div>
       </Link>
 
-
-      {/* =========================
-          MOBILE MENU BUTTON
-      ========================= */}
-
+      {/* MOBILE MENU BUTTON */}
       <button
         className="mobile-menu-button"
-        onClick={() =>
-          setMenuOpen(!menuOpen)
-        }
+        onClick={() => setMenuOpen(!menuOpen)}
       >
         {menuOpen ? "✕" : "☰"}
       </button>
 
-
-      {/* =========================
-          NAVIGATION
-      ========================= */}
-
+      {/* NAVIGATION */}
       <div
-        className={`hireflow-nav ${menuOpen ? "mobile-open" : ""
-          }`}
+        className={`hireflow-nav ${
+          menuOpen ? "mobile-open" : ""
+        }`}
       >
 
-        <Link
-          to="/"
-          onClick={closeMenu}
-        >
+        <Link to="/" onClick={closeMenu}>
           🏠 <span>Home</span>
         </Link>
 
-        <Link
-          to="/jobs"
-          onClick={closeMenu}
-        >
+        <Link to="/jobs" onClick={closeMenu}>
           💼 <span>Jobs</span>
         </Link>
 
-        <Link
-          to="/profile"
-          onClick={closeMenu}
-        >
+        <Link to="/profile" onClick={closeMenu}>
           👤 <span>Profile</span>
         </Link>
 
-
         {/* Candidate Dashboard */}
-
         {user?.role === "candidate" && (
           <>
             <Link
@@ -117,9 +94,7 @@ function Navbar() {
           </>
         )}
 
-
         {/* Employer Dashboard */}
-
         {user?.role === "employer" && (
           <>
             <Link
@@ -138,26 +113,39 @@ function Navbar() {
           </>
         )}
 
-
-        {/* =========================
-            USER AREA
-        ========================= */}
-
         <div className="nav-divider"></div>
 
+        {/* GUEST ACTIONS */}
+        {!user && (
+          <div className="nav-guest-actions">
+            <Link
+              to="/login"
+              onClick={closeMenu}
+              className="nav-btn-login"
+            >
+              🔑 <span>Login</span>
+            </Link>
+
+            <Link
+              to="/register"
+              onClick={closeMenu}
+              className="nav-btn-register"
+            >
+              ✨ <span>Register</span>
+            </Link>
+          </div>
+        )}
+
+        {/* USER */}
         {user && (
           <div className="nav-user">
-
             <div className="user-avatar">
               {user.name
-                ? user.name
-                  .charAt(0)
-                  .toUpperCase()
+                ? user.name.charAt(0).toUpperCase()
                 : "U"}
             </div>
 
             <div className="user-info">
-
               <strong>
                 {user.name || "User"}
               </strong>
@@ -167,15 +155,11 @@ function Navbar() {
                   ? "Employer"
                   : "Candidate"}
               </small>
-
             </div>
-
           </div>
         )}
 
-
-        {/* Logout */}
-
+        {/* LOGOUT */}
         {user && (
           <button
             onClick={handleLogout}
@@ -187,16 +171,15 @@ function Navbar() {
 
       </div>
 
-
-      {/* =========================
-          NAVBAR STYLES
-      ========================= */}
-
       <style>{`
 
         * {
           box-sizing: border-box;
         }
+
+        /* =========================
+           NAVBAR
+        ========================= */
 
         .hireflow-navbar {
           width: 100%;
@@ -207,24 +190,15 @@ function Navbar() {
 
           padding: 12px 35px;
 
-          background:
-            linear-gradient(
-              135deg,
-              #0f172a,
-              #172554 55%,
-              #1e1b4b
-            );
+          background: #302e36;
 
-          border-bottom:
-            1px solid rgba(255,255,255,.08);
+          border-bottom: 1px solid #46414f;
 
-          box-shadow:
-            0 8px 30px rgba(0,0,0,.18);
+          box-shadow: 0 8px 30px rgba(0,0,0,.25);
 
           position: relative;
           z-index: 1000;
         }
-
 
         /* =========================
            LOGO
@@ -241,7 +215,6 @@ function Navbar() {
           min-width: 210px;
         }
 
-
         .logo-icon {
           width: 45px;
           height: 45px;
@@ -255,35 +228,32 @@ function Navbar() {
           background:
             linear-gradient(
               135deg,
-              #2563eb,
-              #7c3aed
+              #8b5cf6,
+              #a855f7
             );
 
           font-size: 23px;
 
           box-shadow:
             0 6px 18px
-            rgba(37,99,235,.35);
+            rgba(139,92,246,.35);
         }
-
 
         .logo-text {
           font-size: 23px;
 
-          color: white;
+          color: #f5f3ff;
 
           font-weight: 700;
 
           letter-spacing: -.5px;
         }
 
-
         .logo-text strong {
           color: #a78bfa;
 
           margin-left: 3px;
         }
-
 
         /* =========================
            NAVIGATION
@@ -301,7 +271,6 @@ function Navbar() {
           gap: 5px;
         }
 
-
         .hireflow-nav > a {
           display: flex;
 
@@ -311,8 +280,7 @@ function Navbar() {
 
           padding: 10px 12px;
 
-          color:
-            rgba(255,255,255,.82);
+          color: #a9a6b8;
 
           text-decoration: none;
 
@@ -322,27 +290,22 @@ function Navbar() {
 
           border-radius: 9px;
 
-          transition:
-            .2s ease;
+          transition: .2s ease;
         }
-
 
         .hireflow-nav > a:hover {
-          color: white;
+          color: #f5f3ff;
 
-          background:
-            rgba(255,255,255,.09);
+          background: #3a2e52;
 
-          transform:
-            translateY(-1px);
+          transform: translateY(-1px);
         }
-
 
         .hireflow-nav > a:first-child {
-          background:
-            rgba(255,255,255,.07);
-        }
+          background: rgba(139,92,246,.12);
 
+          color: #c4b5fd;
+        }
 
         /* =========================
            DIVIDER
@@ -353,12 +316,10 @@ function Navbar() {
 
           height: 32px;
 
-          background:
-            rgba(255,255,255,.12);
+          background: #46414f;
 
           margin: 0 8px;
         }
-
 
         /* =========================
            USER
@@ -375,10 +336,10 @@ function Navbar() {
 
           border-radius: 11px;
 
-          background:
-            rgba(255,255,255,.06);
-        }
+          background: #383540;
 
+          border: 1px solid #46414f;
+        }
 
         .user-avatar {
           width: 35px;
@@ -394,17 +355,16 @@ function Navbar() {
           background:
             linear-gradient(
               135deg,
-              #2563eb,
-              #8b5cf6
+              #8b5cf6,
+              #a855f7
             );
 
-          color: white;
+          color: #ffffff;
 
           font-weight: 800;
 
           font-size: 14px;
         }
-
 
         .user-info {
           display: flex;
@@ -414,9 +374,8 @@ function Navbar() {
           line-height: 1.2;
         }
 
-
         .user-info strong {
-          color: white;
+          color: #f5f3ff;
 
           font-size: 12px;
 
@@ -429,27 +388,22 @@ function Navbar() {
           white-space: nowrap;
         }
 
-
         .user-info small {
-          color:
-            rgba(255,255,255,.55);
+          color: #a9a6b8;
 
           font-size: 10px;
 
           margin-top: 2px;
         }
 
-
         /* =========================
            LOGOUT
         ========================= */
 
         .logout-button {
-          border: 1px solid
-            rgba(248,113,113,.3);
+          border: 1px solid #7f3a46;
 
-          background:
-            rgba(239,68,68,.12);
+          background: #3a252c;
 
           color: #fca5a5;
 
@@ -466,7 +420,6 @@ function Navbar() {
           transition: .2s ease;
         }
 
-
         .logout-button:hover {
           background: #ef4444;
 
@@ -474,10 +427,60 @@ function Navbar() {
 
           border-color: #ef4444;
 
-          transform:
-            translateY(-1px);
+          transform: translateY(-1px);
         }
 
+        /* =========================
+           GUEST ACTIONS
+        ========================= */
+
+        .nav-guest-actions {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+        }
+
+        .nav-btn-login {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          padding: 8px 14px;
+          border-radius: 9px;
+          font-size: 13px;
+          font-weight: 600;
+          color: #c4b5fd;
+          text-decoration: none;
+          background: rgba(139,92,246,.12);
+          border: 1px solid rgba(139,92,246,.25);
+          transition: .2s ease;
+        }
+
+        .nav-btn-login:hover {
+          background: rgba(139,92,246,.25);
+          color: #ffffff;
+          transform: translateY(-1px);
+        }
+
+        .nav-btn-register {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          padding: 8px 15px;
+          border-radius: 9px;
+          font-size: 13px;
+          font-weight: 700;
+          color: #ffffff;
+          text-decoration: none;
+          background: linear-gradient(135deg, #8b5cf6, #a855f7);
+          box-shadow: 0 4px 14px rgba(139,92,246,.35);
+          transition: .2s ease;
+        }
+
+        .nav-btn-register:hover {
+          background: linear-gradient(135deg, #7c3aed, #9333ea);
+          transform: translateY(-1px);
+          box-shadow: 0 6px 20px rgba(139,92,246,.5);
+        }
 
         /* =========================
            MOBILE BUTTON
@@ -488,12 +491,11 @@ function Navbar() {
 
           margin-left: auto;
 
-          border: none;
+          border: 1px solid #46414f;
 
-          background:
-            rgba(255,255,255,.08);
+          background: #383540;
 
-          color: white;
+          color: #f5f3ff;
 
           width: 42px;
 
@@ -505,7 +507,6 @@ function Navbar() {
 
           cursor: pointer;
         }
-
 
         /* =========================
            RESPONSIVE
@@ -529,7 +530,6 @@ function Navbar() {
 
         }
 
-
         @media (max-width: 850px) {
 
           .hireflow-navbar {
@@ -538,11 +538,9 @@ function Navbar() {
             min-height: 70px;
           }
 
-
           .mobile-menu-button {
             display: block;
           }
-
 
           .hireflow-nav {
             display: none;
@@ -560,11 +558,9 @@ function Navbar() {
             padding: 15px 0 5px;
           }
 
-
           .hireflow-nav.mobile-open {
             display: flex;
           }
-
 
           .hireflow-nav > a {
             width: 100%;
@@ -574,7 +570,6 @@ function Navbar() {
             font-size: 14px;
           }
 
-
           .nav-divider {
             width: 100%;
 
@@ -583,11 +578,9 @@ function Navbar() {
             margin: 8px 0;
           }
 
-
           .nav-user {
             width: 100%;
           }
-
 
           .logout-button {
             width: 100%;

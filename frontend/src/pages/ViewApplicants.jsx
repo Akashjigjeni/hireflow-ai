@@ -13,11 +13,6 @@ function ViewApplicants() {
   const [coverLetters, setCoverLetters] = useState({});
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    window.scrollTo(0, 0);
-    fetchApplicants();
-  }, [jobId]);
-
   const fetchApplicants = async () => {
     try {
       setLoading(true);
@@ -29,108 +24,100 @@ function ViewApplicants() {
       setApplications(res.data);
     } catch (err) {
       console.error(err);
-
-      alert(
-        err.response?.data?.message ||
-        "Failed to fetch applicants"
-      );
+      alert("Failed to fetch applicants");
     } finally {
       setLoading(false);
     }
   };
 
+  useEffect(() => {
+    fetchApplicants();
+  }, [jobId]);
+
   const updateStatus = async (id, status) => {
-    const confirmAction = window.confirm(
-      `Are you sure you want to ${status.toLowerCase()} this application?`
-    );
-
-    if (!confirmAction) return;
-
     try {
       await API.put(
         `/applications/${id}/status`,
-        { status }
+        {
+          status,
+        }
       );
 
-      alert(
-        `Application ${status} Successfully`
-      );
+      alert(`Application ${status} Successfully`);
 
       fetchApplicants();
     } catch (err) {
       console.error(err);
-
-      alert(
-        err.response?.data?.message ||
-        "Failed to update status"
-      );
+      alert("Failed to update status");
     }
   };
 
-  const analyzeResume = async (id) => {
+  const analyzeResume = async (applicationId) => {
     try {
       const res = await API.post(
-        `/ai/analyze/${id}`
+        `/ai/analyze/${applicationId}`
       );
 
       setAnalysis((prev) => ({
         ...prev,
-        [id]: res.data,
+        [applicationId]: res.data,
       }));
     } catch (err) {
       console.error(err);
-
-      alert(
-        err.response?.data?.message ||
-        "Failed to analyze resume"
-      );
+      alert("Failed to analyze resume");
     }
   };
 
-  const generateQuestions = async (id) => {
+  const generateQuestions = async (
+    applicationId
+  ) => {
     try {
       const res = await API.get(
-        `/ai/interview/${id}`
+        `/ai/interview/${applicationId}`
       );
 
       setQuestions((prev) => ({
         ...prev,
-        [id]: res.data.questions,
+        [applicationId]: res.data.questions,
       }));
     } catch (err) {
       console.error(err);
 
       alert(
-        err.response?.data?.message ||
         "Failed to generate interview questions"
       );
     }
   };
 
-  const generateCoverLetter = async (id) => {
+  const generateCoverLetter = async (
+    applicationId
+  ) => {
     try {
       const res = await API.get(
-        `/ai/cover-letter/${id}`
+        `/ai/cover-letter/${applicationId}`
       );
 
       setCoverLetters((prev) => ({
         ...prev,
-        [id]: res.data.coverLetter,
+        [applicationId]: res.data.coverLetter,
       }));
     } catch (err) {
       console.error(err);
 
       alert(
-        err.response?.data?.message ||
         "Failed to generate cover letter"
       );
     }
   };
 
-  const downloadPDF = (id, name) => {
+  const downloadPDF = (
+    applicationId,
+    applicantName
+  ) => {
     const doc = new jsPDF();
 
     doc.setFontSize(18);
+
     doc.text(
       "AI Generated Cover Letter",
       20,
@@ -140,37 +127,62 @@ function ViewApplicants() {
     doc.setFontSize(12);
 
     const letter =
-      coverLetters[id] ||
+      coverLetters[applicationId] ||
       "No Cover Letter Generated";
 
-    const lines = doc.splitTextToSize(
-      letter,
-      170
-    );
+    const lines =
+      doc.splitTextToSize(letter, 170);
 
     doc.text(lines, 20, 35);
 
     doc.save(
-      `${name || "Candidate"}_CoverLetter.pdf`
+      `${applicantName}_CoverLetter.pdf`
     );
   };
 
-  if (loading) {
-    return (
-      <>
-        <Navbar />
+  const getStatusStyle = (status) => {
+    const value = status?.toLowerCase();
 
-        <div style={styles.loading}>
-          <div style={styles.loadingIcon}>
-            👥
-          </div>
+    if (value === "accepted") {
+      return {
+        background:
+          "rgba(74, 222, 128, 0.12)",
+        color: "#86efac",
+        border:
+          "1px solid rgba(74, 222, 128, 0.3)",
+      };
+    }
 
-          <h2>Loading Applicants...</h2>
-          <p>Please wait.</p>
-        </div>
-      </>
-    );
-  }
+    if (value === "rejected") {
+      return {
+        background:
+          "rgba(248, 113, 113, 0.12)",
+        color: "#fca5a5",
+        border:
+          "1px solid rgba(248, 113, 113, 0.3)",
+      };
+    }
+
+    return {
+      background:
+        "rgba(167, 139, 250, 0.12)",
+      color: "#c4b5fd",
+      border:
+        "1px solid rgba(167, 139, 250, 0.3)",
+    };
+  };
+
+  const getRecommendation = (score) => {
+    if (score >= 80) {
+      return "⭐ Highly Recommended";
+    }
+
+    if (score >= 50) {
+      return "👍 Good Candidate";
+    }
+
+    return "⚠ Needs Improvement";
+  };
 
   return (
     <div style={styles.page}>
@@ -178,1087 +190,1065 @@ function ViewApplicants() {
 
       <main style={styles.container}>
 
-        {/* HEADER */}
+        {/* HERO */}
 
         <section style={styles.hero}>
-          <div style={styles.heroIcon}>
-            👥
-          </div>
 
           <div style={styles.heroContent}>
-            <h1 style={styles.heroTitle}>
-              Job Applicants
-            </h1>
 
-            <p style={styles.heroSubtitle}>
-              Review candidates and use AI-powered
-              recruitment tools.
-            </p>
-          </div>
-        </section>
-
-        {/* COUNT */}
-
-        <div style={styles.countBox}>
-          📋{" "}
-          <strong>
-            {applications.length}
-          </strong>{" "}
-          {applications.length === 1
-            ? "Applicant"
-            : "Applicants"}
-        </div>
-
-        {/* EMPTY */}
-
-        {applications.length === 0 ? (
-          <div style={styles.emptyBox}>
-            <div style={styles.emptyIcon}>
-              📭
+            <div style={styles.heroIcon}>
+              👥
             </div>
 
-            <h2>No Applicants Yet</h2>
+            <div>
 
-            <p>
+              <div style={styles.badge}>
+                APPLICANT MANAGEMENT
+              </div>
+
+              <h1 style={styles.heroTitle}>
+                Manage Your{" "}
+                <span style={styles.gradientText}>
+                  Applicants
+                </span>
+              </h1>
+
+              <p style={styles.heroSubtitle}>
+                Review candidate profiles, analyze
+                resumes and manage applications with
+                AI-powered recruitment tools.
+              </p>
+
+            </div>
+
+          </div>
+
+          <div style={styles.applicantCount}>
+            <strong>
+              {applications.length}
+            </strong>
+
+            <span>
+              Total Applicants
+            </span>
+          </div>
+
+        </section>
+
+
+        {/* LOADING */}
+
+        {loading ? (
+
+          <div style={styles.emptyState}>
+
+            <div style={styles.loader}>
+              ⏳
+            </div>
+
+            <h2 style={styles.emptyTitle}>
+              Loading Applicants...
+            </h2>
+
+            <p style={styles.emptyText}>
+              Please wait while we load the
+              applications.
+            </p>
+
+          </div>
+
+        ) : applications.length === 0 ? (
+
+          /* EMPTY */
+
+          <div style={styles.emptyState}>
+
+            <div style={styles.emptyIcon}>
+              👥
+            </div>
+
+            <h2 style={styles.emptyTitle}>
+              No Applicants Yet
+            </h2>
+
+            <p style={styles.emptyText}>
               Applications for this job will
               appear here.
             </p>
+
           </div>
+
         ) : (
-          <div>
+
+          <div style={styles.applicationsList}>
+
             {applications.map((app) => {
-              const candidate =
+
+              const applicant =
                 app.applicant || {};
 
+              const applicantName =
+                applicant.name || "Candidate";
+
               return (
+
                 <article
                   key={app._id}
                   style={styles.card}
                 >
 
-                  {/* CANDIDATE HEADER */}
+                  {/* TOP SECTION */}
 
-                  <div style={styles.profileSection}>
-                    <img
-                      src={
-                        candidate.profileImage
-                          ? `http://localhost:5000/${candidate.profileImage}`
-                          : `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                            candidate.name ||
-                            "Candidate"
-                          )}&background=2563eb&color=fff`
-                      }
-                      alt="Candidate"
-                      style={styles.profileImage}
-                    />
+                  <div style={styles.cardTop}>
 
-                    <div style={styles.profileInfo}>
-                      <h2 style={styles.candidateName}>
-                        {candidate.name ||
-                          "Candidate"}
-                      </h2>
+                    <div style={styles.profileSection}>
 
-                      <p style={styles.email}>
-                        ✉️{" "}
-                        {candidate.email ||
-                          "No email"}
-                      </p>
+                      <img
+                        src={
+                          applicant.profileImage
+                            ? `http://localhost:5000/${applicant.profileImage}`
+                            : `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                                applicantName
+                              )}&background=7c3aed&color=ffffff`
+                        }
+                        alt={applicantName}
+                        style={styles.profileImage}
+                      />
 
-                      <div style={styles.statusRow}>
-                        <span>
-                          Application Status
-                        </span>
+                      <div>
 
-                        <span
-                          style={{
-                            ...styles.statusBadge,
-                            background:
-                              app.status ===
-                                "Accepted"
-                                ? "#dcfce7"
-                                : app.status ===
-                                  "Rejected"
-                                  ? "#fee2e2"
-                                  : "#fef3c7",
-                            color:
-                              app.status ===
-                                "Accepted"
-                                ? "#15803d"
-                                : app.status ===
-                                  "Rejected"
-                                  ? "#b91c1c"
-                                  : "#b45309",
-                          }}
-                        >
-                          {app.status}
-                        </span>
+                        <h2 style={styles.name}>
+                          {applicantName}
+                        </h2>
+
+                        <p style={styles.email}>
+                          ✉️ {applicant.email ||
+                            "Email not available"}
+                        </p>
+
                       </div>
+
                     </div>
+
+
+                    <div
+                      style={{
+                        ...styles.status,
+                        ...getStatusStyle(
+                          app.status
+                        ),
+                      }}
+                    >
+                      {app.status === "Accepted"
+                        ? "✓ Accepted"
+                        : app.status === "Rejected"
+                        ? "✕ Rejected"
+                        : "◷ Pending"}
+                    </div>
+
                   </div>
 
 
-                  {/* INFORMATION */}
+                  {/* CANDIDATE INFORMATION */}
 
                   <div style={styles.infoGrid}>
 
-                    <InfoItem
-                      icon="📞"
-                      label="Phone"
-                      value={
-                        candidate.phone ||
-                        "Not Added"
-                      }
-                    />
+                    <div style={styles.infoItem}>
+                      <span style={styles.infoIcon}>
+                        📱
+                      </span>
 
-                    <InfoItem
-                      icon="📍"
-                      label="Location"
-                      value={
-                        candidate.location ||
-                        "Not Added"
-                      }
-                    />
+                      <div>
+                        <small>Phone</small>
 
-                    <InfoItem
-                      icon="🎓"
-                      label="Education"
-                      value={
-                        candidate.education ||
-                        "Not Added"
-                      }
-                    />
+                        <strong>
+                          {applicant.phone ||
+                            "Not Added"}
+                        </strong>
+                      </div>
+                    </div>
 
-                    <InfoItem
-                      icon="💻"
-                      label="Skills"
-                      value={
-                        candidate.skills ||
-                        "Not Added"
-                      }
-                    />
+
+                    <div style={styles.infoItem}>
+                      <span style={styles.infoIcon}>
+                        📍
+                      </span>
+
+                      <div>
+                        <small>Location</small>
+
+                        <strong>
+                          {applicant.location ||
+                            "Not Added"}
+                        </strong>
+                      </div>
+                    </div>
+
+
+                    <div style={styles.infoItem}>
+                      <span style={styles.infoIcon}>
+                        🎓
+                      </span>
+
+                      <div>
+                        <small>Education</small>
+
+                        <strong>
+                          {applicant.education ||
+                            "Not Added"}
+                        </strong>
+                      </div>
+                    </div>
+
+
+                    <div style={styles.infoItem}>
+                      <span style={styles.infoIcon}>
+                        🛠️
+                      </span>
+
+                      <div>
+                        <small>Skills</small>
+
+                        <strong>
+                          {applicant.skills ||
+                            "Not Added"}
+                        </strong>
+                      </div>
+                    </div>
+
                   </div>
 
 
                   {/* RESUME */}
 
-                  <div style={styles.resumeBox}>
-                    <div style={styles.resumeInfo}>
-                      <strong>
-                        📄 Resume
-                      </strong>
+                  <div style={styles.resumeSection}>
 
-                      <p>
-                        Candidate's uploaded resume
+                    <div>
+
+                      <h3 style={styles.sectionTitle}>
+                        📄 Resume
+                      </h3>
+
+                      <p style={styles.sectionText}>
+                        View the candidate's uploaded
+                        resume and professional details.
                       </p>
+
                     </div>
 
                     {app.resume ? (
+
                       <a
                         href={`http://localhost:5000/${app.resume}`}
                         target="_blank"
                         rel="noreferrer"
                         style={styles.resumeButton}
                       >
-                        View Resume →
+                        📄 View Resume
                       </a>
+
                     ) : (
+
                       <span style={styles.noResume}>
                         No Resume Uploaded
                       </span>
+
                     )}
+
                   </div>
 
 
                   {/* ACTIONS */}
 
-                  <div style={styles.actions}>
+                  <div style={styles.actionSection}>
 
-                    <button
-                      onClick={() =>
-                        updateStatus(
-                          app._id,
-                          "Accepted"
-                        )
-                      }
-                      style={styles.acceptBtn}
-                    >
-                      ✅ Accept
-                    </button>
+                    <h3 style={styles.actionTitle}>
+                      ⚡ Applicant Actions
+                    </h3>
 
-                    <button
-                      onClick={() =>
-                        updateStatus(
-                          app._id,
-                          "Rejected"
-                        )
-                      }
-                      style={styles.rejectBtn}
-                    >
-                      ❌ Reject
-                    </button>
+                    <div style={styles.buttonGrid}>
 
-                    <button
-                      onClick={() =>
-                        analyzeResume(app._id)
-                      }
-                      style={styles.analyzeBtn}
-                    >
-                      🤖 Analyze Resume
-                    </button>
+                      <button
+                        onClick={() =>
+                          updateStatus(
+                            app._id,
+                            "Accepted"
+                          )
+                        }
+                        style={styles.acceptButton}
+                      >
+                        ✓ Accept
+                      </button>
 
-                    <button
-                      onClick={() =>
-                        generateQuestions(
-                          app._id
-                        )
-                      }
-                      style={styles.questionBtn}
-                    >
-                      🎯 Interview Questions
-                    </button>
 
-                    <button
-                      onClick={() =>
-                        generateCoverLetter(
-                          app._id
-                        )
-                      }
-                      style={styles.coverBtn}
-                    >
-                      📄 AI Cover Letter
-                    </button>
+                      <button
+                        onClick={() =>
+                          updateStatus(
+                            app._id,
+                            "Rejected"
+                          )
+                        }
+                        style={styles.rejectButton}
+                      >
+                        ✕ Reject
+                      </button>
+
+
+                      <button
+                        onClick={() =>
+                          analyzeResume(app._id)
+                        }
+                        style={styles.analyzeButton}
+                      >
+                        🤖 Analyze Resume
+                      </button>
+
+
+                      <button
+                        onClick={() =>
+                          generateQuestions(
+                            app._id
+                          )
+                        }
+                        style={styles.questionButton}
+                      >
+                        🎯 Interview Questions
+                      </button>
+
+
+                      <button
+                        onClick={() =>
+                          generateCoverLetter(
+                            app._id
+                          )
+                        }
+                        style={styles.coverLetterButton}
+                      >
+                        ✨ AI Cover Letter
+                      </button>
+
+                    </div>
 
                   </div>
 
 
-                  {/* AI ANALYSIS */}
+                  {/* AI RESUME ANALYSIS */}
 
                   {analysis[app._id] && (
-                    <div style={styles.analysisBox}>
 
-                      <h3>
-                        🤖 AI Resume Analysis
-                      </h3>
+                    <div style={styles.aiBox}>
 
-                      <div style={styles.scoreBox}>
-                        <span>
-                          Match Score
-                        </span>
+                      <div style={styles.aiHeader}>
 
-                        <strong>
-                          {
-                            analysis[app._id]
-                              .score
-                          }%
-                        </strong>
+                        <div>
+
+                          <h3 style={styles.aiTitle}>
+                            🤖 AI Resume Analysis
+                          </h3>
+
+                          <p style={styles.aiSubtitle}>
+                            AI-powered candidate matching
+                            insights
+                          </p>
+
+                        </div>
+
+                        <div style={styles.scoreBox}>
+                          <strong>
+                            {analysis[app._id].score}%
+                          </strong>
+
+                          <span>
+                            Match Score
+                          </span>
+                        </div>
+
                       </div>
 
-                      <p style={styles.resultText}>
-                        <strong>
-                          Matched Skills:
-                        </strong>{" "}
-                        {analysis[app._id]
-                          .matchedSkills?.length
-                          ? analysis[
-                            app._id
-                          ].matchedSkills.join(
-                            ", "
-                          )
-                          : "None"}
-                      </p>
 
-                      <p style={styles.resultText}>
-                        <strong>
-                          Missing Skills:
-                        </strong>{" "}
-                        {analysis[app._id]
-                          .missingSkills?.length
-                          ? analysis[
-                            app._id
-                          ].missingSkills.join(
-                            ", "
-                          )
-                          : "None"}
-                      </p>
+                      <div style={styles.analysisGrid}>
+
+                        <div style={styles.skillBox}>
+
+                          <h4>
+                            ✓ Matched Skills
+                          </h4>
+
+                          <p>
+                            {analysis[app._id]
+                              .matchedSkills?.length
+                              ? analysis[
+                                  app._id
+                                ].matchedSkills.join(
+                                  ", "
+                                )
+                              : "None"}
+                          </p>
+
+                        </div>
+
+
+                        <div style={styles.skillBox}>
+
+                          <h4>
+                            + Missing Skills
+                          </h4>
+
+                          <p>
+                            {analysis[app._id]
+                              .missingSkills?.length
+                              ? analysis[
+                                  app._id
+                                ].missingSkills.join(
+                                  ", "
+                                )
+                              : "None"}
+                          </p>
+
+                        </div>
+
+                      </div>
+
+
+                      <div
+                        style={{
+                          ...styles.recommendation,
+                          color:
+                            analysis[app._id].score >= 80
+                              ? "#86efac"
+                              : analysis[app._id]
+                                  .score >= 50
+                              ? "#c4b5fd"
+                              : "#fca5a5",
+                        }}
+                      >
+                        {getRecommendation(
+                          analysis[app._id].score
+                        )}
+                      </div>
 
                     </div>
+
                   )}
 
 
-                  {/* QUESTIONS */}
+                  {/* INTERVIEW QUESTIONS */}
 
                   {questions[app._id] && (
-                    <div style={styles.questionBox}>
 
-                      <h3>
+                    <div style={styles.questionsBox}>
+
+                      <h3 style={styles.aiTitle}>
                         🎯 AI Interview Questions
                       </h3>
 
+                      <p style={styles.aiSubtitle}>
+                        Personalized questions generated
+                        for this candidate.
+                      </p>
+
                       <ol style={styles.questionList}>
-                        {questions[
-                          app._id
-                        ].map(
+
+                        {questions[app._id].map(
                           (question, index) => (
-                            <li key={index}>
+
+                            <li
+                              key={index}
+                              style={styles.questionItem}
+                            >
                               {question}
                             </li>
+
                           )
                         )}
+
                       </ol>
 
                     </div>
+
                   )}
 
 
                   {/* COVER LETTER */}
 
                   {coverLetters[app._id] && (
-                    <div style={styles.coverBox}>
 
-                      <h3>
-                        📄 AI Generated Cover Letter
+                    <div style={styles.coverLetterBox}>
+
+                      <h3 style={styles.aiTitle}>
+                        ✨ AI Generated Cover Letter
                       </h3>
 
-                      <div
-                        style={
-                          styles.coverLetterText
-                        }
-                      >
-                        {
-                          coverLetters[
-                          app._id
-                          ]
-                        }
+                      <div style={styles.letterContent}>
+                        {coverLetters[app._id]}
                       </div>
 
                       <button
                         onClick={() =>
                           downloadPDF(
                             app._id,
-                            candidate.name
+                            applicantName
                           )
                         }
-                        style={
-                          styles.downloadBtn
-                        }
+                        style={styles.downloadButton}
                       >
                         📥 Download Cover Letter PDF
                       </button>
 
                     </div>
+
                   )}
 
                 </article>
+
               );
             })}
+
           </div>
+
         )}
+
       </main>
-
-      <style>{`
-
-        * {
-          box-sizing: border-box;
-        }
-
-        html,
-        body,
-        #root {
-          margin: 0;
-          width: 100%;
-          max-width: 100%;
-          overflow-x: hidden;
-        }
-
-        .view-applicants-page {
-          width: 100%;
-          overflow-x: hidden;
-        }
-
-        @media (max-width: 900px) {
-          .view-applicants-container {
-            width: calc(100% - 30px) !important;
-          }
-        }
-
-        @media (max-width: 600px) {
-
-          .view-applicants-container {
-            width: calc(100% - 20px) !important;
-            padding-top: 20px !important;
-            padding-bottom: 35px !important;
-          }
-
-          .view-applicants-hero {
-            padding: 18px !important;
-            gap: 12px !important;
-          }
-
-          .view-applicants-title {
-            font-size: 22px !important;
-          }
-
-          .view-applicants-subtitle {
-            font-size: 10px !important;
-          }
-
-          .view-applicants-card {
-            padding: 16px !important;
-          }
-
-          .view-applicants-profile {
-            flex-direction: column !important;
-            align-items: flex-start !important;
-          }
-
-          .view-applicants-profile-image {
-            width: 78px !important;
-            height: 78px !important;
-          }
-
-          .view-applicants-name {
-            font-size: 21px !important;
-          }
-
-          .view-applicants-info-grid {
-            grid-template-columns: 1fr !important;
-          }
-
-          .view-applicants-resume {
-            flex-direction: column !important;
-            align-items: flex-start !important;
-          }
-
-          .view-applicants-resume-button {
-            width: 100% !important;
-            text-align: center !important;
-          }
-
-          .view-applicants-actions {
-            display: grid !important;
-            grid-template-columns: 1fr !important;
-          }
-
-          .view-applicants-action-button {
-            width: 100% !important;
-          }
-
-          .view-applicants-score {
-            flex-direction: column !important;
-            align-items: flex-start !important;
-            gap: 5px !important;
-          }
-
-          .view-applicants-question-box,
-          .view-applicants-analysis-box,
-          .view-applicants-cover-box {
-            padding: 15px !important;
-          }
-
-          .view-applicants-cover-text {
-            font-size: 12px !important;
-          }
-        }
-
-      `}</style>
     </div>
   );
 }
 
 
-/* =====================================================
-   INFO ITEM
-===================================================== */
-
-function InfoItem({
-  icon,
-  label,
-  value,
-}) {
-  return (
-    <div
-      className="view-applicants-info-item"
-      style={styles.infoItem}
-    >
-      <span style={styles.infoIcon}>
-        {icon}
-      </span>
-
-      <div style={styles.infoContent}>
-        <small style={styles.infoLabel}>
-          {label}
-        </small>
-
-        <p style={styles.infoValue}>
-          {value}
-        </p>
-      </div>
-    </div>
-  );
-}
-
-
-/* =====================================================
-   STYLES
-===================================================== */
+/* ============================================
+   HIRE FLOW AI DARK PURPLE THEME
+============================================ */
 
 const styles = {
+
   page: {
-    width: "100%",
     minHeight: "100vh",
-    overflowX: "hidden",
-
     background:
-      "linear-gradient(135deg,#eef4ff,#f8fafc,#f5f3ff)",
-
+      "linear-gradient(135deg, #17161f 0%, #211f2b 50%, #18171f 100%)",
+    color: "#f8fafc",
     fontFamily:
       "'Segoe UI', Arial, sans-serif",
-
-    color: "#172554",
   },
+
 
   container: {
-    width:
-      "min(1150px, calc(100% - 40px))",
-
-    maxWidth: "100%",
-
+    width: "min(1300px, calc(100% - 40px))",
     margin: "0 auto",
-
-    padding: "30px 0 55px",
-
-    minWidth: 0,
+    padding: "42px 0 70px",
   },
+
 
   hero: {
-    display: "flex",
-
-    alignItems: "center",
-
-    gap: "16px",
-
-    padding: "24px",
-
-    marginBottom: "20px",
-
-    borderRadius: "18px",
-
+    minHeight: "180px",
+    padding: "28px 38px",
+    borderRadius: "24px",
     background:
-      "linear-gradient(135deg,#1e3a8a,#2563eb,#7c3aed)",
-
-    color: "white",
-
+      "linear-gradient(105deg, #243b7a, #3d5ec7 55%, #743de0)",
     boxShadow:
-      "0 15px 35px rgba(37,99,235,.2)",
-
-    overflow: "hidden",
+      "0 20px 50px rgba(0,0,0,0.28)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: "30px",
+    marginBottom: "32px",
   },
 
+
+  heroContent: {
+    display: "flex",
+    alignItems: "center",
+    gap: "24px",
+  },
+
+
   heroIcon: {
-    width: "55px",
-    height: "55px",
-
-    borderRadius: "14px",
-
+    width: "76px",
+    height: "76px",
+    borderRadius: "20px",
+    background:
+      "rgba(255,255,255,0.14)",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-
-    background:
-      "rgba(255,255,255,.15)",
-
-    fontSize: "25px",
-
+    fontSize: "35px",
+    border:
+      "1px solid rgba(255,255,255,0.12)",
     flexShrink: 0,
   },
 
-  heroContent: {
-    minWidth: 0,
-    flex: 1,
+
+  badge: {
+    display: "inline-block",
+    padding: "7px 15px",
+    borderRadius: "30px",
+    background:
+      "rgba(255,255,255,0.14)",
+    border:
+      "1px solid rgba(255,255,255,0.16)",
+    fontSize: "10px",
+    fontWeight: "800",
+    letterSpacing: "1.1px",
+    marginBottom: "9px",
+    color: "#ede9fe",
   },
+
 
   heroTitle: {
     margin: 0,
-    fontSize: "29px",
+    fontSize: "42px",
     fontWeight: "800",
+    letterSpacing: "-1px",
   },
+
+
+  gradientText: {
+    color: "#e9ddff",
+  },
+
 
   heroSubtitle: {
-    margin: "5px 0 0",
-    color: "rgba(255,255,255,.82)",
-    fontSize: "12px",
-    lineHeight: "1.5",
+    margin: "8px 0 0",
+    color: "#dbeafe",
+    fontSize: "15px",
+    maxWidth: "700px",
+    lineHeight: "1.6",
   },
 
-  countBox: {
-    display: "inline-flex",
-    alignItems: "center",
-    gap: "6px",
 
-    background: "white",
+  applicantCount: {
+    minWidth: "130px",
+    padding: "22px",
+    borderRadius: "20px",
+    background:
+      "rgba(20,18,30,0.18)",
+    border:
+      "1px solid rgba(255,255,255,0.18)",
+    textAlign: "center",
+    backdropFilter: "blur(10px)",
+  },
 
-    padding: "10px 15px",
 
-    borderRadius: "10px",
+  applicantCountStrong: {
+    display: "block",
+  },
 
-    marginBottom: "18px",
 
+  emptyState: {
+    padding: "70px 30px",
+    borderRadius: "22px",
+    background:
+      "linear-gradient(145deg, #302f39, #282730)",
+    border: "1px solid #444250",
+    textAlign: "center",
     boxShadow:
-      "0 5px 15px rgba(15,23,42,.07)",
-
-    fontSize: "13px",
+      "0 15px 40px rgba(0,0,0,0.2)",
   },
+
+
+  emptyIcon: {
+    fontSize: "52px",
+    marginBottom: "15px",
+  },
+
+
+  loader: {
+    fontSize: "45px",
+    marginBottom: "15px",
+  },
+
+
+  emptyTitle: {
+    margin: 0,
+    color: "#f5f3ff",
+    fontSize: "24px",
+  },
+
+
+  emptyText: {
+    marginTop: "10px",
+    color: "#a8a5b5",
+    fontSize: "14px",
+  },
+
+
+  applicationsList: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "26px",
+  },
+
 
   card: {
-    background: "white",
-
-    padding: "24px",
-
-    borderRadius: "18px",
-
-    marginBottom: "20px",
-
-    border:
-      "1px solid #e2e8f0",
-
+    padding: "30px",
+    borderRadius: "24px",
+    background:
+      "linear-gradient(145deg, #302f39, #292830)",
+    border: "1px solid #464452",
     boxShadow:
-      "0 8px 28px rgba(15,23,42,.08)",
-
-    minWidth: 0,
-
-    overflow: "hidden",
+      "0 18px 45px rgba(0,0,0,0.22)",
   },
+
+
+  cardTop: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    gap: "20px",
+    paddingBottom: "25px",
+    borderBottom:
+      "1px solid #44424e",
+  },
+
 
   profileSection: {
     display: "flex",
-
     alignItems: "center",
-
     gap: "18px",
-
-    paddingBottom: "18px",
-
-    borderBottom:
-      "1px solid #e2e8f0",
-
-    minWidth: 0,
   },
+
 
   profileImage: {
-    width: "95px",
-    height: "95px",
-
-    borderRadius: "50%",
-
+    width: "78px",
+    height: "78px",
+    borderRadius: "22px",
     objectFit: "cover",
-
     border:
-      "4px solid #2563eb",
-
-    flexShrink: 0,
+      "3px solid rgba(139,92,246,0.75)",
+    boxShadow:
+      "0 10px 25px rgba(124,58,237,0.22)",
   },
 
-  profileInfo: {
-    minWidth: 0,
-    flex: 1,
-  },
 
-  candidateName: {
+  name: {
     margin: 0,
-
-    fontSize: "24px",
-
-    color: "#172554",
-
-    fontWeight: "800",
-
-    wordBreak: "break-word",
+    fontSize: "25px",
+    color: "#f8fafc",
   },
+
 
   email: {
-    margin: "6px 0 10px",
-
-    color: "#64748b",
-
-    fontSize: "13px",
-
-    wordBreak: "break-word",
+    margin: "7px 0 0",
+    color: "#aaa7b5",
+    fontSize: "14px",
   },
 
-  statusRow: {
-    display: "flex",
 
-    alignItems: "center",
-
-    gap: "8px",
-
-    flexWrap: "wrap",
-
-    fontSize: "11px",
-
-    color: "#64748b",
-  },
-
-  statusBadge: {
-    padding: "5px 10px",
-
-    borderRadius: "20px",
-
+  status: {
+    padding: "9px 15px",
+    borderRadius: "30px",
+    fontSize: "12px",
     fontWeight: "800",
-
-    fontSize: "10px",
-  },
-
-  infoGrid: {
-    display: "grid",
-
-    gridTemplateColumns:
-      "repeat(2, minmax(0,1fr))",
-
-    gap: "10px",
-
-    marginTop: "18px",
-
-    minWidth: 0,
-  },
-
-  infoItem: {
-    display: "flex",
-
-    alignItems: "center",
-
-    gap: "10px",
-
-    padding: "12px",
-
-    borderRadius: "10px",
-
-    background: "#f8fafc",
-
-    minWidth: 0,
-  },
-
-  infoIcon: {
-    width: "36px",
-    height: "36px",
-
-    display: "flex",
-
-    alignItems: "center",
-
-    justifyContent: "center",
-
-    borderRadius: "9px",
-
-    background: "#eff6ff",
-
-    fontSize: "17px",
-
-    flexShrink: 0,
-  },
-
-  infoContent: {
-    minWidth: 0,
-  },
-
-  infoLabel: {
-    display: "block",
-
-    color: "#94a3b8",
-
-    fontSize: "9px",
-  },
-
-  infoValue: {
-    margin: "3px 0 0",
-
-    color: "#334155",
-
-    fontSize: "12px",
-
-    fontWeight: "700",
-
-    wordBreak: "break-word",
-  },
-
-  resumeBox: {
-    marginTop: "17px",
-
-    padding: "14px",
-
-    borderRadius: "11px",
-
-    background: "#f8fafc",
-
-    display: "flex",
-
-    alignItems: "center",
-
-    justifyContent: "space-between",
-
-    gap: "12px",
-
-    flexWrap: "wrap",
-
-    minWidth: 0,
-  },
-
-  resumeInfo: {
-    minWidth: 0,
-  },
-
-  resumeButton: {
-    textDecoration: "none",
-
-    background: "#2563eb",
-
-    color: "white",
-
-    padding: "9px 14px",
-
-    borderRadius: "8px",
-
-    fontSize: "12px",
-
-    fontWeight: "700",
-
     whiteSpace: "nowrap",
   },
 
-  noResume: {
-    color: "#dc2626",
 
-    fontSize: "11px",
-
-    fontWeight: "700",
+  infoGrid: {
+    display: "grid",
+    gridTemplateColumns:
+      "repeat(auto-fit, minmax(210px, 1fr))",
+    gap: "15px",
+    marginTop: "25px",
   },
 
-  actions: {
+
+  infoItem: {
     display: "flex",
-
-    flexWrap: "wrap",
-
-    gap: "9px",
-
-    marginTop: "18px",
-  },
-
-  acceptBtn: {
-    background: "#16a34a",
-    color: "white",
-    border: "none",
-    padding: "10px 15px",
-    borderRadius: "8px",
-    cursor: "pointer",
-    fontWeight: "700",
-    fontSize: "12px",
-  },
-
-  rejectBtn: {
-    background: "#dc2626",
-    color: "white",
-    border: "none",
-    padding: "10px 15px",
-    borderRadius: "8px",
-    cursor: "pointer",
-    fontWeight: "700",
-    fontSize: "12px",
-  },
-
-  analyzeBtn: {
-    background: "#7c3aed",
-    color: "white",
-    border: "none",
-    padding: "10px 15px",
-    borderRadius: "8px",
-    cursor: "pointer",
-    fontWeight: "700",
-    fontSize: "12px",
-  },
-
-  questionBtn: {
-    background: "#2563eb",
-    color: "white",
-    border: "none",
-    padding: "10px 15px",
-    borderRadius: "8px",
-    cursor: "pointer",
-    fontWeight: "700",
-    fontSize: "12px",
-  },
-
-  coverBtn: {
-    background: "#0ea5e9",
-    color: "white",
-    border: "none",
-    padding: "10px 15px",
-    borderRadius: "8px",
-    cursor: "pointer",
-    fontWeight: "700",
-    fontSize: "12px",
-  },
-
-  analysisBox: {
-    marginTop: "18px",
-
-    padding: "18px",
-
-    background: "#f8fafc",
-
-    borderRadius: "11px",
-
+    alignItems: "center",
+    gap: "12px",
+    padding: "16px",
+    borderRadius: "16px",
+    background:
+      "rgba(255,255,255,0.035)",
     border:
-      "1px solid #cbd5e1",
-
-    minWidth: 0,
-
-    overflow: "hidden",
+      "1px solid rgba(255,255,255,0.07)",
   },
+
+
+  infoIcon: {
+    width: "42px",
+    height: "42px",
+    borderRadius: "12px",
+    background:
+      "rgba(124,58,237,0.16)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    fontSize: "18px",
+    flexShrink: 0,
+  },
+
+
+  resumeSection: {
+    marginTop: "22px",
+    padding: "20px",
+    borderRadius: "18px",
+    background:
+      "rgba(255,255,255,0.035)",
+    border:
+      "1px solid rgba(255,255,255,0.07)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: "20px",
+  },
+
+
+  sectionTitle: {
+    margin: 0,
+    color: "#f5f3ff",
+    fontSize: "17px",
+  },
+
+
+  sectionText: {
+    margin: "5px 0 0",
+    color: "#a8a5b5",
+    fontSize: "13px",
+  },
+
+
+  resumeButton: {
+    padding: "11px 18px",
+    borderRadius: "10px",
+    background:
+      "rgba(124,58,237,0.16)",
+    border:
+      "1px solid rgba(167,139,250,0.4)",
+    color: "#ddd6fe",
+    fontWeight: "700",
+    fontSize: "13px",
+    textDecoration: "none",
+    whiteSpace: "nowrap",
+  },
+
+
+  noResume: {
+    color: "#aaa7b5",
+    fontSize: "13px",
+  },
+
+
+  actionSection: {
+    marginTop: "25px",
+    paddingTop: "22px",
+    borderTop:
+      "1px solid #44424e",
+  },
+
+
+  actionTitle: {
+    margin: "0 0 15px",
+    color: "#f5f3ff",
+    fontSize: "18px",
+  },
+
+
+  buttonGrid: {
+    display: "flex",
+    flexWrap: "wrap",
+    gap: "12px",
+  },
+
+
+  acceptButton: {
+    border: "none",
+    padding: "11px 18px",
+    borderRadius: "10px",
+    background:
+      "linear-gradient(135deg, #15803d, #22c55e)",
+    color: "white",
+    fontWeight: "700",
+    cursor: "pointer",
+  },
+
+
+  rejectButton: {
+    border: "none",
+    padding: "11px 18px",
+    borderRadius: "10px",
+    background:
+      "linear-gradient(135deg, #b91c1c, #ef4444)",
+    color: "white",
+    fontWeight: "700",
+    cursor: "pointer",
+  },
+
+
+  analyzeButton: {
+    border: "1px solid rgba(167,139,250,0.4)",
+    padding: "11px 18px",
+    borderRadius: "10px",
+    background:
+      "linear-gradient(135deg, #5b21b6, #7c3aed)",
+    color: "white",
+    fontWeight: "700",
+    cursor: "pointer",
+  },
+
+
+  questionButton: {
+    border:
+      "1px solid rgba(139,92,246,0.4)",
+    padding: "11px 18px",
+    borderRadius: "10px",
+    background:
+      "rgba(124,58,237,0.18)",
+    color: "#ddd6fe",
+    fontWeight: "700",
+    cursor: "pointer",
+  },
+
+
+  coverLetterButton: {
+    border:
+      "1px solid rgba(192,132,252,0.4)",
+    padding: "11px 18px",
+    borderRadius: "10px",
+    background:
+      "rgba(168,85,247,0.16)",
+    color: "#e9d5ff",
+    fontWeight: "700",
+    cursor: "pointer",
+  },
+
+
+  aiBox: {
+    marginTop: "25px",
+    padding: "24px",
+    borderRadius: "20px",
+    background:
+      "linear-gradient(145deg, rgba(76,29,149,0.2), rgba(49,46,129,0.1))",
+    border:
+      "1px solid rgba(139,92,246,0.28)",
+  },
+
+
+  aiHeader: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    gap: "20px",
+  },
+
+
+  aiTitle: {
+    margin: 0,
+    color: "#f5f3ff",
+    fontSize: "19px",
+  },
+
+
+  aiSubtitle: {
+    margin: "6px 0 0",
+    color: "#aaa7b5",
+    fontSize: "13px",
+  },
+
 
   scoreBox: {
-    display: "flex",
-
-    justifyContent: "space-between",
-
-    alignItems: "center",
-
-    gap: "10px",
-
+    minWidth: "100px",
     padding: "12px",
-
-    marginBottom: "12px",
-
-    background: "white",
-
-    borderRadius: "9px",
-  },
-
-  resultText: {
-    fontSize: "12px",
-
-    lineHeight: "1.6",
-
-    wordBreak: "break-word",
-  },
-
-  questionBox: {
-    marginTop: "18px",
-
-    padding: "18px",
-
-    background: "#eef4ff",
-
-    borderRadius: "11px",
-
+    borderRadius: "14px",
+    textAlign: "center",
+    background:
+      "rgba(124,58,237,0.16)",
     border:
-      "1px solid #93c5fd",
-
-    overflow: "hidden",
+      "1px solid rgba(167,139,250,0.25)",
   },
+
+
+  analysisGrid: {
+    display: "grid",
+    gridTemplateColumns:
+      "repeat(auto-fit, minmax(240px, 1fr))",
+    gap: "15px",
+    marginTop: "20px",
+  },
+
+
+  skillBox: {
+    padding: "16px",
+    borderRadius: "14px",
+    background:
+      "rgba(255,255,255,0.04)",
+    border:
+      "1px solid rgba(255,255,255,0.06)",
+  },
+
+
+  recommendation: {
+    marginTop: "18px",
+    padding: "13px 16px",
+    borderRadius: "12px",
+    background:
+      "rgba(255,255,255,0.04)",
+    fontWeight: "700",
+  },
+
+
+  questionsBox: {
+    marginTop: "25px",
+    padding: "24px",
+    borderRadius: "20px",
+    background:
+      "rgba(124,58,237,0.08)",
+    border:
+      "1px solid rgba(139,92,246,0.25)",
+  },
+
 
   questionList: {
-    paddingLeft: "20px",
-
-    marginBottom: 0,
-
-    lineHeight: "1.7",
-
-    fontSize: "12px",
-
-    color: "#334155",
+    margin: "20px 0 0",
+    paddingLeft: "22px",
   },
 
-  coverBox: {
-    marginTop: "18px",
 
-    padding: "18px",
+  questionItem: {
+    marginBottom: "14px",
+    padding: "13px",
+    borderRadius: "10px",
+    background:
+      "rgba(255,255,255,0.035)",
+    color: "#d6d3df",
+    lineHeight: "1.6",
+  },
 
-    background: "#f0fdf4",
 
-    borderRadius: "11px",
-
+  coverLetterBox: {
+    marginTop: "25px",
+    padding: "24px",
+    borderRadius: "20px",
+    background:
+      "linear-gradient(145deg, rgba(109,40,217,0.14), rgba(124,58,237,0.06))",
     border:
-      "1px solid #86efac",
-
-    overflow: "hidden",
+      "1px solid rgba(167,139,250,0.25)",
   },
 
-  coverLetterText: {
-    marginTop: "12px",
 
-    padding: "15px",
-
-    borderRadius: "9px",
-
-    background: "white",
-
+  letterContent: {
+    marginTop: "18px",
+    padding: "18px",
+    borderRadius: "14px",
+    background:
+      "rgba(0,0,0,0.16)",
+    color: "#d6d3df",
+    lineHeight: "1.8",
     whiteSpace: "pre-wrap",
-
-    wordBreak: "break-word",
-
-    overflowWrap: "anywhere",
-
-    lineHeight: "1.7",
-
-    fontSize: "13px",
-
-    color: "#334155",
   },
 
-  downloadBtn: {
-    marginTop: "15px",
 
-    background: "#16a34a",
-
-    color: "white",
-
+  downloadButton: {
+    marginTop: "18px",
     border: "none",
-
-    padding: "10px 15px",
-
-    borderRadius: "8px",
-
-    cursor: "pointer",
-
+    padding: "12px 20px",
+    borderRadius: "10px",
+    background:
+      "linear-gradient(135deg, #6d28d9, #9333ea)",
+    color: "white",
     fontWeight: "700",
-
-    fontSize: "12px",
+    cursor: "pointer",
   },
 
-  emptyBox: {
-    background: "white",
-
-    padding: "55px 20px",
-
-    borderRadius: "18px",
-
-    textAlign: "center",
-
-    boxShadow:
-      "0 8px 25px rgba(15,23,42,.08)",
-  },
-
-  emptyIcon: {
-    fontSize: "45px",
-  },
-
-  loading: {
-    minHeight: "80vh",
-
-    display: "flex",
-
-    flexDirection: "column",
-
-    alignItems: "center",
-
-    justifyContent: "center",
-
-    color: "#172554",
-  },
-
-  loadingIcon: {
-    fontSize: "42px",
-  },
 };
+
 
 export default ViewApplicants;

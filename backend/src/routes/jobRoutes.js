@@ -1,4 +1,5 @@
 const express = require("express");
+
 const router = express.Router();
 
 const {
@@ -8,42 +9,43 @@ const {
   updateJob,
   deleteJob,
   getMyJobs,
-  getDashboardStats,
   getRecommendedJobs,
 } = require("../controllers/jobController");
 
 const { protect } = require("../middleware/authMiddleware");
 
 // =====================================
-// Public Routes
+// PUBLIC ROUTES
 // =====================================
 
-// Get all jobs
+// Get all available jobs
 router.get("/", getJobs);
 
 // =====================================
-// Protected Routes
+// PROTECTED ROUTES
 // =====================================
 
-// Employer Dashboard Statistics
-router.get("/stats", protect, getDashboardStats);
-
-// Employer's Posted Jobs
+// Get jobs posted by logged-in employer
 router.get("/my/jobs", protect, getMyJobs);
 
-// AI Recommended Jobs
+// AI recommended jobs for candidate
 router.get("/recommended", protect, getRecommendedJobs);
 
-// Create Job
+// Create a new job
 router.post("/", protect, createJob);
 
-// Update Job
+// Update a job
 router.put("/:id", protect, updateJob);
 
-// Delete Job
+// Delete a job
 router.delete("/:id", protect, deleteJob);
 
-// Get Single Job (Keep this LAST)
+// =====================================
+// GET SINGLE JOB
+// Keep this LAST because "/:id"
+// can otherwise capture other routes
+// =====================================
+
 router.get("/:id", getJobById);
 
 module.exports = router;

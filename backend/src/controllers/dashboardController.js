@@ -1,15 +1,17 @@
 const Job = require("../models/Job");
 const Application = require("../models/Application");
 
-// @desc Get Employer Dashboard Statistics
-// @route GET /api/dashboard/stats
-// @access Private
+// =====================================
+// GET EMPLOYER DASHBOARD STATISTICS
+// GET /api/dashboard/stats
+// Private
+// =====================================
 
 const getEmployerStats = async (req, res) => {
   try {
     const employerId = req.user._id;
 
-    // Get all jobs posted by logged-in employer
+    // Get all jobs posted by the logged-in employer
     const jobs = await Job.find({
       postedBy: employerId,
     });
@@ -18,22 +20,28 @@ const getEmployerStats = async (req, res) => {
 
     // Get all applications for employer's jobs
     const applications = await Application.find({
-      job: { $in: jobIds },
+      job: {
+        $in: jobIds,
+      },
     });
 
     const totalJobs = jobs.length;
+
     const totalApplicants = applications.length;
 
     const accepted = applications.filter(
-      (app) => app.status === "Accepted"
+      (application) =>
+        application.status === "Accepted"
     ).length;
 
     const rejected = applications.filter(
-      (app) => app.status === "Rejected"
+      (application) =>
+        application.status === "Rejected"
     ).length;
 
     const pending = applications.filter(
-      (app) => app.status === "Pending"
+      (application) =>
+        application.status === "Pending"
     ).length;
 
     res.status(200).json({
@@ -43,12 +51,16 @@ const getEmployerStats = async (req, res) => {
       rejected,
       pending,
     });
-  } catch (err) {
-    console.error("Dashboard Error:", err);
+
+  } catch (error) {
+    console.error(
+      "Dashboard Statistics Error:",
+      error
+    );
 
     res.status(500).json({
-      message: "Server Error",
-      error: err.message,
+      message:
+        "Failed to fetch dashboard statistics",
     });
   }
 };

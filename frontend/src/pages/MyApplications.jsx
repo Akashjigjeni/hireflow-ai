@@ -24,35 +24,42 @@ function MyApplications() {
   const getStatusStyle = (status) => {
     if (status === "Accepted") {
       return {
-        background: "#dcfce7",
-        color: "#15803d",
+        background: "rgba(34, 197, 94, 0.15)",
+        color: "#4ADE80",
+        border: "1px solid rgba(34, 197, 94, 0.4)",
       };
     }
 
     if (status === "Rejected") {
       return {
-        background: "#fee2e2",
-        color: "#dc2626",
+        background: "rgba(239, 68, 68, 0.15)",
+        color: "#FCA5A5",
+        border: "1px solid rgba(239, 68, 68, 0.4)",
       };
     }
 
     return {
-      background: "#fef3c7",
-      color: "#d97706",
+      background: "rgba(139, 92, 246, 0.15)",
+      color: "#C4B5FD",
+      border: "1px solid rgba(139, 92, 246, 0.4)",
     };
   };
 
   if (loading) {
     return (
-      <>
+      <div style={styles.page}>
         <Navbar />
 
         <div style={styles.loading}>
           <div style={styles.loadingIcon}>⏳</div>
-          <h2>Loading Applications...</h2>
-          <p>Please wait</p>
+          <h2 style={styles.loadingTitle}>
+            Loading Applications...
+          </h2>
+          <p style={styles.loadingText}>
+            Please wait
+          </p>
         </div>
-      </>
+      </div>
     );
   }
 
@@ -78,9 +85,11 @@ function MyApplications() {
         {/* Application Count */}
         {applications.length > 0 && (
           <div style={styles.countBox}>
-            <span>📊 Total Applications</span>
+            <span style={styles.countLabel}>
+              📊 Total Applications
+            </span>
 
-            <strong>
+            <strong style={styles.countNumber}>
               {applications.length}
             </strong>
           </div>
@@ -93,9 +102,11 @@ function MyApplications() {
               📭
             </div>
 
-            <h2>No Applications Found</h2>
+            <h2 style={styles.emptyTitle}>
+              No Applications Found
+            </h2>
 
-            <p>
+            <p style={styles.emptyText}>
               You haven't applied for any jobs yet.
             </p>
           </div>
@@ -114,11 +125,11 @@ function MyApplications() {
 
                   <div>
                     <h2 style={styles.jobTitle}>
-                      💼 {app.job.title}
+                      💼 {app.job?.title || "Job"}
                     </h2>
 
                     <p style={styles.company}>
-                      🏢 {app.job.company}
+                      🏢 {app.job?.company || "Company"}
                     </p>
                   </div>
 
@@ -141,24 +152,29 @@ function MyApplications() {
                 <div style={styles.infoGrid}>
 
                   <div style={styles.infoItem}>
-                    <span>📍</span>
+                    <span style={styles.infoIcon}>📍</span>
 
                     <div>
-                      <small>Location</small>
-                      <strong>
-                        {app.job.location || "Not specified"}
+                      <small style={styles.infoLabel}>
+                        Location
+                      </small>
+
+                      <strong style={styles.infoValue}>
+                        {app.job?.location || "Not specified"}
                       </strong>
                     </div>
                   </div>
 
                   <div style={styles.infoItem}>
-                    <span>💰</span>
+                    <span style={styles.infoIcon}>💰</span>
 
                     <div>
-                      <small>Salary</small>
-                      <strong>
-                        {app.job.salaryRange ||
-                          "Not specified"}
+                      <small style={styles.infoLabel}>
+                        Salary
+                      </small>
+
+                      <strong style={styles.infoValue}>
+                        {app.job?.salaryRange || "Not specified"}
                       </strong>
                     </div>
                   </div>
@@ -168,11 +184,11 @@ function MyApplications() {
                 {/* Cover Letter */}
                 <div style={styles.coverBox}>
 
-                  <h3>
+                  <h3 style={styles.coverTitle}>
                     ✍️ Cover Letter
                   </h3>
 
-                  <p>
+                  <p style={styles.coverText}>
                     {app.coverLetter ||
                       "No cover letter provided."}
                   </p>
@@ -210,83 +226,125 @@ const styles = {
 
   page: {
     minHeight: "100vh",
-    background:
-      "linear-gradient(135deg, #0f172a, #172554, #312e81)",
-    color: "#1e293b",
-    fontFamily:
-      "'Segoe UI', Arial, sans-serif",
+    background: "#24232A",
+    color: "#F5F3FF",
+    fontFamily: "system-ui, 'Segoe UI', Roboto, Arial, sans-serif",
   },
 
   container: {
     width: "min(1050px, calc(100% - 40px))",
     margin: "0 auto",
-    padding: "45px 0 60px",
+    padding: "45px 0 70px",
   },
+
+  /* Header */
 
   header: {
     textAlign: "center",
-    color: "white",
-    marginBottom: "30px",
+    marginBottom: "35px",
   },
 
   headerIcon: {
-    width: "60px",
-    height: "60px",
-    margin: "0 auto 12px",
+    width: "64px",
+    height: "64px",
+    margin: "0 auto 14px",
     borderRadius: "16px",
+
     background:
-      "linear-gradient(135deg, #2563eb, #7c3aed)",
+      "linear-gradient(135deg, #8B5CF6, #A855F7)",
+
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    fontSize: "28px",
+
+    fontSize: "30px",
+
     boxShadow:
-      "0 10px 30px rgba(37,99,235,0.35)",
+      "0 10px 25px rgba(139, 92, 246, 0.30)",
   },
 
   title: {
     margin: 0,
     fontSize: "38px",
     fontWeight: "800",
+    color: "#F5F3FF",
   },
 
   subtitle: {
     marginTop: "8px",
-    color: "#cbd5e1",
-    fontSize: "14px",
+    color: "#A9A6B8",
+    fontSize: "15px",
   },
 
+  /* Count Box */
+
   countBox: {
-    maxWidth: "300px",
-    margin: "0 auto 25px",
-    padding: "14px 20px",
+    maxWidth: "330px",
+    margin: "0 auto 30px",
+
+    padding: "15px 20px",
+
     borderRadius: "12px",
-    background:
-      "rgba(255,255,255,0.12)",
-    border:
-      "1px solid rgba(255,255,255,0.2)",
-    color: "white",
+
+    background: "#302E36",
+    border: "1px solid #46414F",
+
+    color: "#F5F3FF",
+
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    backdropFilter: "blur(10px)",
+
+    boxShadow:
+      "0 8px 20px rgba(0,0,0,0.18)",
   },
+
+  countLabel: {
+    color: "#C4B5FD",
+    fontWeight: "600",
+  },
+
+  countNumber: {
+    color: "#FFFFFF",
+    fontSize: "22px",
+  },
+
+  /* Empty State */
 
   emptyBox: {
     maxWidth: "600px",
     margin: "40px auto",
+
     padding: "60px 30px",
-    background: "white",
+
+    background: "#302E36",
+
+    border: "1px solid #46414F",
+
     borderRadius: "18px",
+
     textAlign: "center",
+
     boxShadow:
-      "0 15px 40px rgba(0,0,0,0.25)",
+      "0 12px 30px rgba(0,0,0,0.20)",
   },
 
   emptyIcon: {
-    fontSize: "50px",
+    fontSize: "52px",
     marginBottom: "15px",
   },
+
+  emptyTitle: {
+    color: "#F5F3FF",
+    margin: "0 0 10px",
+  },
+
+  emptyText: {
+    color: "#A9A6B8",
+    margin: 0,
+  },
+
+  /* Application List */
 
   applicationList: {
     display: "flex",
@@ -294,100 +352,192 @@ const styles = {
     gap: "22px",
   },
 
+  /* Card */
+
   card: {
-    background: "rgba(255,255,255,0.97)",
+    background: "#302E36",
+
     borderRadius: "18px",
+
     padding: "26px",
+
+    border: "1px solid #46414F",
+
     boxShadow:
-      "0 12px 35px rgba(0,0,0,0.25)",
-    border:
-      "1px solid rgba(255,255,255,0.5)",
+      "0 10px 28px rgba(0,0,0,0.20)",
   },
 
   cardHeader: {
     display: "flex",
+
     justifyContent: "space-between",
+
     alignItems: "flex-start",
+
     gap: "20px",
+
     borderBottom:
-      "1px solid #e2e8f0",
+      "1px solid #46414F",
+
     paddingBottom: "18px",
   },
 
   jobTitle: {
     margin: 0,
+
     fontSize: "23px",
-    color: "#172554",
+
+    color: "#F5F3FF",
   },
 
   company: {
-    margin:
-      "7px 0 0",
-    color: "#64748b",
+    margin: "7px 0 0",
+
+    color: "#A9A6B8",
+
     fontSize: "14px",
   },
 
+  /* Status */
+
   status: {
     padding: "8px 14px",
+
     borderRadius: "20px",
+
     fontSize: "12px",
+
     fontWeight: "700",
+
     whiteSpace: "nowrap",
   },
 
+  /* Information */
+
   infoGrid: {
     display: "grid",
+
     gridTemplateColumns:
       "repeat(auto-fit, minmax(220px, 1fr))",
+
     gap: "15px",
+
     marginTop: "20px",
   },
 
   infoItem: {
     display: "flex",
+
     alignItems: "center",
-    gap: "10px",
-    padding: "13px",
-    borderRadius: "10px",
-    background: "#f8fafc",
+
+    gap: "12px",
+
+    padding: "15px",
+
+    borderRadius: "12px",
+
+    background: "#3A3842",
+
+    border: "1px solid #46414F",
   },
 
-  infoItemSpan: {
-    fontSize: "20px",
+  infoIcon: {
+    fontSize: "22px",
   },
 
-  infoItemSmall: {
+  infoLabel: {
     display: "block",
-    color: "#64748b",
-    fontSize: "10px",
+
+    color: "#A9A6B8",
+
+    fontSize: "11px",
+
+    marginBottom: "3px",
   },
+
+  infoValue: {
+    color: "#F5F3FF",
+
+    fontSize: "14px",
+  },
+
+  /* Cover Letter */
 
   coverBox: {
     marginTop: "20px",
-    padding: "18px",
+
+    padding: "20px",
+
     borderRadius: "12px",
-    background: "#f8fafc",
+
+    background: "#3A3842",
+
     border:
-      "1px solid #e2e8f0",
+      "1px solid #46414F",
   },
 
-  date: {
-    marginTop: "15px",
-    color: "#64748b",
-    fontSize: "11px",
+  coverTitle: {
+    margin: "0 0 10px",
+
+    color: "#C4B5FD",
+
+    fontSize: "16px",
   },
+
+  coverText: {
+    margin: 0,
+
+    color: "#A9A6B8",
+
+    lineHeight: "1.6",
+  },
+
+  /* Date */
+
+  date: {
+    marginTop: "18px",
+
+    paddingTop: "15px",
+
+    borderTop: "1px solid #46414F",
+
+    color: "#A9A6B8",
+
+    fontSize: "12px",
+  },
+
+  /* Loading */
 
   loading: {
     minHeight: "80vh",
+
     display: "flex",
+
     flexDirection: "column",
+
     alignItems: "center",
+
     justifyContent: "center",
-    color: "white",
+
+    color: "#F5F3FF",
   },
 
   loadingIcon: {
-    fontSize: "40px",
+    fontSize: "45px",
+
+    marginBottom: "12px",
+  },
+
+  loadingTitle: {
+    margin: "0 0 6px",
+
+    color: "#F5F3FF",
+  },
+
+  loadingText: {
+    margin: 0,
+
+    color: "#A9A6B8",
   },
 };
 

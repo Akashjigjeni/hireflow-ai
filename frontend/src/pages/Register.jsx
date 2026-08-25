@@ -61,26 +61,20 @@ function Register() {
 
   return (
     <div style={styles.page}>
-
       {/* Background */}
       <div style={styles.background}></div>
 
-      {/* Blur Overlay */}
-      <div style={styles.overlay}></div>
-
-      {/* Main Card */}
+      {/* Main Container */}
       <div style={styles.container}>
 
-        {/* ================= LEFT SIDE ================= */}
-
+        {/* LEFT SIDE */}
         <div style={styles.left}>
-
           <div style={styles.logoRow}>
             <div style={styles.logo}>H</div>
 
             <div>
               <h2 style={styles.logoText}>
-                HireFlow <span>AI</span>
+                HireFlow <span style={{ color: "#A855F7" }}>AI</span>
               </h2>
 
               <p style={styles.logoSub}>
@@ -90,7 +84,6 @@ function Register() {
           </div>
 
           <div style={styles.leftContent}>
-
             <div style={styles.badge}>
               ✨ AI-POWERED RECRUITMENT
             </div>
@@ -98,7 +91,9 @@ function Register() {
             <h1 style={styles.title}>
               Start Your
               <br />
-              <span>Career Journey.</span>
+              <span style={styles.gradientText}>
+                Career Journey.
+              </span>
             </h1>
 
             <p style={styles.description}>
@@ -110,39 +105,42 @@ function Register() {
             <div style={styles.features}>
 
               <div style={styles.feature}>
-                <div style={styles.featureIcon}>
-                  👤
-                </div>
+                <div style={styles.featureIcon}>👤</div>
 
                 <div>
-                  <b>For Candidates</b>
-                  <small>
+                  <b style={styles.featureTitle}>
+                    For Candidates
+                  </b>
+
+                  <small style={styles.featureText}>
                     Discover your dream job
                   </small>
                 </div>
               </div>
 
               <div style={styles.feature}>
-                <div style={styles.featureIcon}>
-                  🏢
-                </div>
+                <div style={styles.featureIcon}>🏢</div>
 
                 <div>
-                  <b>For Employers</b>
-                  <small>
+                  <b style={styles.featureTitle}>
+                    For Employers
+                  </b>
+
+                  <small style={styles.featureText}>
                     Find the right talent
                   </small>
                 </div>
               </div>
 
               <div style={styles.feature}>
-                <div style={styles.featureIcon}>
-                  🤖
-                </div>
+                <div style={styles.featureIcon}>🤖</div>
 
                 <div>
-                  <b>AI-Powered Hiring</b>
-                  <small>
+                  <b style={styles.featureTitle}>
+                    AI-Powered Hiring
+                  </b>
+
+                  <small style={styles.featureText}>
                     Faster and smarter recruitment
                   </small>
                 </div>
@@ -152,15 +150,11 @@ function Register() {
           </div>
         </div>
 
-        {/* ================= RIGHT SIDE ================= */}
-
+        {/* RIGHT SIDE */}
         <div style={styles.right}>
-
           <div style={styles.formCard}>
 
-            <div style={styles.userIcon}>
-              ✨
-            </div>
+            <div style={styles.userIcon}>✨</div>
 
             <h2 style={styles.welcome}>
               Create Account
@@ -170,23 +164,19 @@ function Register() {
               Join HireFlow AI today
             </p>
 
-            {/* Message */}
-
             {message && (
               <div
                 style={{
                   ...styles.message,
-                  background: message.includes(
-                    "Successful"
-                  )
-                    ? "#ecfdf5"
-                    : "#fef2f2",
-
-                  color: message.includes(
-                    "Successful"
-                  )
-                    ? "#15803d"
-                    : "#dc2626",
+                  background: message.includes("Successful")
+                    ? "rgba(34, 197, 94, 0.12)"
+                    : "rgba(239, 68, 68, 0.12)",
+                  border: message.includes("Successful")
+                    ? "1px solid rgba(34, 197, 94, 0.35)"
+                    : "1px solid rgba(239, 68, 68, 0.35)",
+                  color: message.includes("Successful")
+                    ? "#4ADE80"
+                    : "#FCA5A5",
                 }}
               >
                 {message}
@@ -195,17 +185,13 @@ function Register() {
 
             <form onSubmit={handleSubmit}>
 
-              {/* Full Name */}
-
+              {/* NAME */}
               <label style={styles.label}>
                 Full Name
               </label>
 
               <div style={styles.inputWrapper}>
-
-                <span style={styles.inputIcon}>
-                  👤
-                </span>
+                <span style={styles.inputIcon}>👤</span>
 
                 <input
                   type="text"
@@ -216,25 +202,20 @@ function Register() {
                   required
                   style={styles.input}
                 />
-
               </div>
 
-              {/* Email */}
-
+              {/* EMAIL */}
               <label
                 style={{
                   ...styles.label,
-                  marginTop: "12px",
+                  marginTop: "14px",
                 }}
               >
                 Email Address
               </label>
 
               <div style={styles.inputWrapper}>
-
-                <span style={styles.inputIcon}>
-                  ✉️
-                </span>
+                <span style={styles.inputIcon}>✉️</span>
 
                 <input
                   type="email"
@@ -245,25 +226,20 @@ function Register() {
                   required
                   style={styles.input}
                 />
-
               </div>
 
-              {/* Password */}
-
+              {/* PASSWORD */}
               <label
                 style={{
                   ...styles.label,
-                  marginTop: "12px",
+                  marginTop: "14px",
                 }}
               >
                 Password
               </label>
 
               <div style={styles.inputWrapper}>
-
-                <span style={styles.inputIcon}>
-                  🔒
-                </span>
+                <span style={styles.inputIcon}>🔒</span>
 
                 <input
                   type={
@@ -288,15 +264,13 @@ function Register() {
                 >
                   {showPassword ? "🙈" : "👁️"}
                 </button>
-
               </div>
 
-              {/* Account Type */}
-
+              {/* ACCOUNT TYPE */}
               <label
                 style={{
                   ...styles.label,
-                  marginTop: "12px",
+                  marginTop: "14px",
                 }}
               >
                 Account Type
@@ -304,24 +278,21 @@ function Register() {
 
               <div style={styles.roleContainer}>
 
-                {/* Candidate */}
-
                 <label
                   style={{
                     ...styles.roleOption,
 
                     border:
                       formData.role === "candidate"
-                        ? "2px solid #2563eb"
-                        : "1px solid #d7deeb",
+                        ? "2px solid #8B5CF6"
+                        : "1px solid #46414F",
 
                     background:
                       formData.role === "candidate"
-                        ? "#eff6ff"
-                        : "#f8fafc",
+                        ? "#3A2E52"
+                        : "#302E36",
                   }}
                 >
-
                   <input
                     type="radio"
                     name="role"
@@ -332,13 +303,8 @@ function Register() {
                     onChange={handleChange}
                   />
 
-                  <span>
-                    👤 Candidate
-                  </span>
-
+                  <span>👤 Candidate</span>
                 </label>
-
-                {/* Employer */}
 
                 <label
                   style={{
@@ -346,16 +312,15 @@ function Register() {
 
                     border:
                       formData.role === "employer"
-                        ? "2px solid #7c3aed"
-                        : "1px solid #d7deeb",
+                        ? "2px solid #A855F7"
+                        : "1px solid #46414F",
 
                     background:
                       formData.role === "employer"
-                        ? "#f5f3ff"
-                        : "#f8fafc",
+                        ? "#3A2E52"
+                        : "#302E36",
                   }}
                 >
-
                   <input
                     type="radio"
                     name="role"
@@ -366,16 +331,12 @@ function Register() {
                     onChange={handleChange}
                   />
 
-                  <span>
-                    🏢 Employer
-                  </span>
-
+                  <span>🏢 Employer</span>
                 </label>
 
               </div>
 
-              {/* Create Account */}
-
+              {/* CREATE BUTTON */}
               <button
                 type="submit"
                 disabled={loading}
@@ -386,13 +347,12 @@ function Register() {
               >
                 {loading
                   ? "Creating Account..."
-                  : "🚀  Create Account"}
+                  : "🚀 Create Account"}
               </button>
 
             </form>
 
-            {/* Login */}
-
+            {/* LOGIN */}
             <p style={styles.loginText}>
               Already have an account?{" "}
 
@@ -410,133 +370,62 @@ function Register() {
 
           </div>
         </div>
-      </div>
 
-      {/* Footer */}
+      </div>
 
       <div style={styles.footer}>
         © 2026 HireFlow AI. All rights reserved.
       </div>
-
     </div>
   );
 }
 
-
-/* =====================================================
+/* =========================
    STYLES
-===================================================== */
+========================= */
 
 const styles = {
-
-  /* Page */
-
   page: {
     width: "100%",
-    height: "100vh",
     minHeight: "100vh",
-
     position: "relative",
-
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-
     overflow: "hidden",
-
-    fontFamily:
-      "'Segoe UI', Arial, sans-serif",
+    background: "#24232A",
+    fontFamily: "system-ui, Segoe UI, Arial, sans-serif",
   },
-
-
-  /* Background Image */
 
   background: {
     position: "absolute",
     inset: 0,
-
-    backgroundImage:
-      "url('https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&w=2000&q=85')",
-
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-
-    filter: "blur(5px)",
-
-    transform: "scale(1.05)",
-
+    background:
+      "radial-gradient(circle at 15% 20%, rgba(139,92,246,0.18), transparent 30%), radial-gradient(circle at 85% 80%, rgba(168,85,247,0.15), transparent 30%), #24232A",
     zIndex: 0,
   },
 
-
-  /* Overlay */
-
-  overlay: {
-    position: "absolute",
-    inset: 0,
-
-    background:
-      "linear-gradient(135deg, rgba(15,23,42,0.82), rgba(30,64,175,0.65), rgba(76,29,149,0.62))",
-
-    backdropFilter: "blur(3px)",
-
-    zIndex: 1,
-  },
-
-
-  /* Main Card */
-
   container: {
     width: "min(1000px, calc(100% - 40px))",
-
-    height: "min(650px, calc(100vh - 80px))",
-
+    minHeight: "620px",
     display: "grid",
-
-    gridTemplateColumns:
-      "1fr 0.9fr",
-
+    gridTemplateColumns: "1fr 0.9fr",
     borderRadius: "24px",
-
     overflow: "hidden",
-
-    background:
-      "rgba(255,255,255,0.14)",
-
-    backdropFilter: "blur(25px)",
-
-    WebkitBackdropFilter:
-      "blur(25px)",
-
-    border:
-      "1px solid rgba(255,255,255,0.35)",
-
-    boxShadow:
-      "0 30px 80px rgba(0,0,0,0.35)",
-
+    background: "#302E36",
+    border: "1px solid #46414F",
+    boxShadow: "0 30px 80px rgba(0,0,0,0.45)",
     position: "relative",
-
     zIndex: 2,
   },
 
-
-  /* Left */
-
   left: {
     padding: "42px",
-
-    color: "white",
-
+    color: "#F5F3FF",
     background:
-      "linear-gradient(145deg, rgba(15,23,42,0.55), rgba(37,99,235,0.32))",
-
+      "linear-gradient(145deg, #2B2733 0%, #352846 55%, #302E36 100%)",
     boxSizing: "border-box",
-
-    overflow: "hidden",
   },
-
-
-  /* Logo */
 
   logoRow: {
     display: "flex",
@@ -547,41 +436,30 @@ const styles = {
   logo: {
     width: "46px",
     height: "46px",
-
     borderRadius: "13px",
-
     background:
-      "linear-gradient(135deg,#2563eb,#7c3aed)",
-
+      "linear-gradient(135deg, #8B5CF6, #A855F7)",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-
+    color: "#FFFFFF",
     fontSize: "24px",
     fontWeight: "800",
-
-    boxShadow:
-      "0 8px 25px rgba(37,99,235,0.4)",
+    boxShadow: "0 8px 25px rgba(139,92,246,0.35)",
   },
 
   logoText: {
     margin: 0,
-
+    color: "#F5F3FF",
     fontSize: "23px",
-
     fontWeight: "800",
   },
 
   logoSub: {
     margin: "2px 0 0",
-
     fontSize: "10px",
-
-    opacity: 0.7,
+    color: "#A9A6B8",
   },
-
-
-  /* Left Content */
 
   leftContent: {
     marginTop: "45px",
@@ -589,369 +467,236 @@ const styles = {
 
   badge: {
     display: "inline-block",
-
     padding: "7px 12px",
-
     borderRadius: "20px",
-
-    background:
-      "rgba(255,255,255,0.12)",
-
-    border:
-      "1px solid rgba(255,255,255,0.25)",
-
+    background: "rgba(139,92,246,0.14)",
+    border: "1px solid rgba(167,139,250,0.28)",
+    color: "#C4B5FD",
     fontSize: "10px",
-
     letterSpacing: "0.5px",
+    fontWeight: "700",
   },
 
   title: {
-    fontSize: "36px",
-
+    fontSize: "38px",
     lineHeight: "1.1",
-
     letterSpacing: "-1.5px",
-
     margin: "18px 0",
-
     fontWeight: "800",
+    color: "#F5F3FF",
+  },
+
+  gradientText: {
+    color: "#A78BFA",
   },
 
   description: {
     maxWidth: "430px",
-
     fontSize: "14px",
-
     lineHeight: "1.7",
-
-    color:
-      "rgba(255,255,255,0.82)",
+    color: "#A9A6B8",
   },
 
-
-  /* Features */
-
   features: {
-    marginTop: "25px",
-
+    marginTop: "28px",
     display: "flex",
-
     flexDirection: "column",
-
-    gap: "12px",
+    gap: "14px",
   },
 
   feature: {
     display: "flex",
-
     alignItems: "center",
-
     gap: "12px",
   },
 
   featureIcon: {
-    width: "38px",
-    height: "38px",
-
-    borderRadius: "10px",
-
-    background:
-      "rgba(255,255,255,0.14)",
-
+    width: "40px",
+    height: "40px",
+    borderRadius: "11px",
+    background: "#3A2E52",
+    border: "1px solid #4C3A68",
     display: "flex",
-
     alignItems: "center",
-
     justifyContent: "center",
-
-    fontSize: "17px",
-
+    fontSize: "18px",
     flexShrink: 0,
   },
 
+  featureTitle: {
+    display: "block",
+    color: "#F5F3FF",
+    fontSize: "13px",
+  },
 
-  /* Right */
+  featureText: {
+    display: "block",
+    marginTop: "2px",
+    color: "#A9A6B8",
+    fontSize: "11px",
+  },
 
   right: {
     display: "flex",
-
     alignItems: "center",
-
     justifyContent: "center",
-
-    padding: "28px 35px",
-
-    background:
-      "rgba(255,255,255,0.92)",
-
+    padding: "35px",
+    background: "#302E36",
     boxSizing: "border-box",
-
-    overflowY: "auto",
-
-    minHeight: 0,
   },
-
-
-  /* Form */
 
   formCard: {
     width: "100%",
-
     maxWidth: "370px",
-
-    color: "#172554",
-
-    padding: "5px 0",
+    color: "#F5F3FF",
   },
 
   userIcon: {
     width: "46px",
     height: "46px",
-
     borderRadius: "50%",
-
     background:
-      "linear-gradient(135deg,#2563eb,#7c3aed)",
-
+      "linear-gradient(135deg, #8B5CF6, #A855F7)",
     display: "flex",
-
     alignItems: "center",
-
     justifyContent: "center",
-
     fontSize: "20px",
-
-    marginBottom: "10px",
+    marginBottom: "12px",
+    boxShadow: "0 8px 20px rgba(139,92,246,0.25)",
   },
 
   welcome: {
-    fontSize: "27px",
-
+    fontSize: "28px",
     margin: 0,
-
     fontWeight: "800",
+    color: "#F5F3FF",
   },
 
   subtitle: {
     marginTop: "5px",
-
-    marginBottom: "18px",
-
-    color: "#64748b",
-
+    marginBottom: "20px",
+    color: "#A9A6B8",
     fontSize: "13px",
   },
 
-
-  /* Message */
-
   message: {
-    padding: "9px",
-
+    padding: "10px",
     borderRadius: "8px",
-
-    marginBottom: "12px",
-
+    marginBottom: "14px",
     fontSize: "12px",
-
     textAlign: "center",
-
     fontWeight: "600",
   },
 
-
-  /* Labels */
-
   label: {
     display: "block",
-
-    marginBottom: "6px",
-
+    marginBottom: "7px",
     fontSize: "12px",
-
     fontWeight: "700",
-
-    color: "#334155",
+    color: "#D8D5E3",
   },
 
-
-  /* Inputs */
-
   inputWrapper: {
-    height: "44px",
-
+    height: "46px",
     display: "flex",
-
     alignItems: "center",
-
-    border:
-      "1px solid #d7deeb",
-
+    border: "1px solid #46414F",
     borderRadius: "9px",
-
-    background: "#f8fafc",
-
+    background: "#24232A",
     overflow: "hidden",
   },
 
   inputIcon: {
-    paddingLeft: "12px",
-
-    fontSize: "13px",
+    paddingLeft: "13px",
+    fontSize: "14px",
   },
 
   input: {
     flex: 1,
-
     minWidth: 0,
-
     height: "100%",
-
     border: "none",
-
     outline: "none",
-
     background: "transparent",
-
     padding: "0 10px",
-
     fontSize: "13px",
-
-    color: "#172554",
+    color: "#F5F3FF",
   },
 
   eyeButton: {
     border: "none",
-
     background: "transparent",
-
+    color: "#A9A6B8",
     cursor: "pointer",
-
-    padding: "9px",
-
+    padding: "10px",
     fontSize: "13px",
   },
 
-
-  /* Role */
-
   roleContainer: {
     display: "grid",
-
-    gridTemplateColumns:
-      "1fr 1fr",
-
+    gridTemplateColumns: "1fr 1fr",
     gap: "10px",
-
-    marginBottom: "0",
   },
 
   roleOption: {
-    minHeight: "42px",
-
+    minHeight: "44px",
     padding: "8px",
-
     borderRadius: "9px",
-
     cursor: "pointer",
-
     display: "flex",
-
     alignItems: "center",
-
     justifyContent: "center",
-
     gap: "7px",
-
     fontSize: "12px",
-
     fontWeight: "600",
-
+    color: "#F5F3FF",
     boxSizing: "border-box",
   },
 
-
-  /* Register Button */
-
   registerButton: {
     width: "100%",
-
     height: "48px",
-
-    marginTop: "16px",
-
+    marginTop: "18px",
     border: "none",
-
     borderRadius: "9px",
-
     background:
-      "linear-gradient(135deg,#2563eb,#7c3aed)",
-
-    color: "white",
-
+      "linear-gradient(135deg, #8B5CF6, #A855F7)",
+    color: "#FFFFFF",
     fontSize: "14px",
-
     fontWeight: "700",
-
     cursor: "pointer",
-
     boxShadow:
-      "0 10px 25px rgba(37,99,235,0.28)",
-
+      "0 10px 25px rgba(139,92,246,0.28)",
     display: "flex",
-
     alignItems: "center",
-
     justifyContent: "center",
   },
 
-
-  /* Login Link */
-
   loginText: {
     textAlign: "center",
-
-    marginTop: "14px",
-
+    marginTop: "16px",
     fontSize: "12px",
-
-    color: "#64748b",
+    color: "#A9A6B8",
   },
 
   loginLink: {
-    color: "#2563eb",
-
+    color: "#C4B5FD",
     fontWeight: "700",
-
     cursor: "pointer",
   },
 
-
-  /* Security */
-
   security: {
     textAlign: "center",
-
-    marginTop: "10px",
-
-    color: "#64748b",
-
+    marginTop: "12px",
+    color: "#777383",
     fontSize: "9px",
   },
 
-
-  /* Footer */
-
   footer: {
     position: "absolute",
-
-    bottom: "7px",
-
-    color:
-      "rgba(255,255,255,0.7)",
-
+    bottom: "10px",
+    color: "#777383",
     fontSize: "10px",
-
     zIndex: 3,
   },
 };

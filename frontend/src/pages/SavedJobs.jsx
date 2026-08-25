@@ -9,10 +9,6 @@ function SavedJobs() {
   const [savedJobs, setSavedJobs] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchSavedJobs();
-  }, []);
-
   const fetchSavedJobs = async () => {
     try {
       setLoading(true);
@@ -25,12 +21,16 @@ function SavedJobs() {
 
       alert(
         err.response?.data?.message ||
-        "Failed to load saved jobs"
+          "Failed to load saved jobs"
       );
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchSavedJobs();
+  }, []);
 
   const removeJob = async (jobId) => {
     const confirmRemove = window.confirm(
@@ -43,34 +43,33 @@ function SavedJobs() {
       await API.delete(`/saved-jobs/${jobId}`);
 
       await fetchSavedJobs();
-
     } catch (err) {
       console.error(err);
 
       alert(
         err.response?.data?.message ||
-        "Failed to remove job"
+          "Failed to remove job"
       );
     }
   };
 
-  /* =========================
-     LOADING
-  ========================= */
-
   if (loading) {
     return (
-      <>
+      <div style={styles.page}>
         <Navbar />
 
         <div style={styles.loadingPage}>
           <div style={styles.spinner}>❤️</div>
 
-          <h2>Loading Saved Jobs</h2>
+          <h2 style={styles.loadingTitle}>
+            Loading Saved Jobs
+          </h2>
 
-          <p>Please wait...</p>
+          <p style={styles.loadingText}>
+            Please wait...
+          </p>
         </div>
-      </>
+      </div>
     );
   }
 
@@ -80,10 +79,7 @@ function SavedJobs() {
 
       <main style={styles.container}>
 
-        {/* =========================
-            HEADER
-        ========================= */}
-
+        {/* HEADER */}
         <section style={styles.hero}>
 
           <div style={styles.heroLeft}>
@@ -98,8 +94,7 @@ function SavedJobs() {
               </h1>
 
               <p style={styles.heroSubtitle}>
-                Keep track of opportunities you're
-                interested in.
+                Keep track of opportunities you're interested in.
               </p>
             </div>
 
@@ -120,10 +115,7 @@ function SavedJobs() {
         </section>
 
 
-        {/* =========================
-            EMPTY STATE
-        ========================= */}
-
+        {/* EMPTY STATE */}
         {savedJobs.length === 0 ? (
 
           <section style={styles.emptyCard}>
@@ -139,14 +131,11 @@ function SavedJobs() {
             <p style={styles.emptyText}>
               Found a job you like?
               <br />
-              Save it here and come back to it
-              whenever you're ready.
+              Save it here and come back to it whenever you're ready.
             </p>
 
             <button
-              onClick={() =>
-                navigate("/jobs")
-              }
+              onClick={() => navigate("/jobs")}
               style={styles.browseButton}
             >
               🔎 Browse Available Jobs
@@ -156,24 +145,17 @@ function SavedJobs() {
 
         ) : (
 
-          /* =========================
-             SAVED JOBS
-          ========================= */
-
           <section>
 
             <div style={styles.sectionHeader}>
 
-              <div>
-                <h2>
-                  Your Saved Opportunities
-                </h2>
+              <h2 style={styles.sectionTitle}>
+                Your Saved Opportunities
+              </h2>
 
-                <p>
-                  Review and apply to jobs you've
-                  saved.
-                </p>
-              </div>
+              <p style={styles.sectionSubtitle}>
+                Review and apply to jobs you've saved.
+              </p>
 
             </div>
 
@@ -193,7 +175,6 @@ function SavedJobs() {
                   >
 
                     {/* JOB TOP */}
-
                     <div style={styles.jobTop}>
 
                       <div style={styles.companyIcon}>
@@ -202,11 +183,11 @@ function SavedJobs() {
 
                       <div style={styles.jobHeading}>
 
-                        <h2>
+                        <h2 style={styles.jobTitle}>
                           {job.title}
                         </h2>
 
-                        <p>
+                        <p style={styles.company}>
                           🏢 {job.company}
                         </p>
 
@@ -216,7 +197,6 @@ function SavedJobs() {
 
 
                     {/* JOB DETAILS */}
-
                     <div style={styles.detailsGrid}>
 
                       <div style={styles.detailBox}>
@@ -226,13 +206,12 @@ function SavedJobs() {
                         </span>
 
                         <div>
-                          <small>
+                          <small style={styles.detailLabel}>
                             Location
                           </small>
 
-                          <strong>
-                            {job.location ||
-                              "Not specified"}
+                          <strong style={styles.detailValue}>
+                            {job.location || "Not specified"}
                           </strong>
                         </div>
 
@@ -246,13 +225,12 @@ function SavedJobs() {
                         </span>
 
                         <div>
-                          <small>
+                          <small style={styles.detailLabel}>
                             Salary
                           </small>
 
-                          <strong>
-                            {job.salaryRange ||
-                              "Not specified"}
+                          <strong style={styles.detailValue}>
+                            {job.salaryRange || "Not specified"}
                           </strong>
                         </div>
 
@@ -262,31 +240,29 @@ function SavedJobs() {
 
 
                     {/* DESCRIPTION */}
-
                     {job.description && (
+
                       <div style={styles.description}>
 
-                        <h4>
+                        <h4 style={styles.descriptionTitle}>
                           📝 Job Description
                         </h4>
 
-                        <p>
+                        <p style={styles.descriptionText}>
                           {job.description}
                         </p>
 
                       </div>
+
                     )}
 
 
                     {/* ACTIONS */}
-
                     <div style={styles.actions}>
 
                       <button
                         onClick={() =>
-                          navigate(
-                            `/apply/${job._id}`
-                          )
+                          navigate(`/apply/${job._id}`)
                         }
                         style={styles.applyButton}
                       >
@@ -321,96 +297,73 @@ function SavedJobs() {
 
 
 /* =====================================================
-   STYLES
+   DARK PURPLE THEME STYLES
 ===================================================== */
 
 const styles = {
 
   page: {
-    minHeight: "calc(100vh - 190px)",
-
-    background:
-      "linear-gradient(135deg, #f5f7ff 0%, #eef4ff 50%, #f8f5ff 100%)",
-
+    minHeight: "100vh",
+    background: "#24232A",
+    color: "#F5F3FF",
     fontFamily:
-      "'Segoe UI', Arial, sans-serif",
-
-    color: "#172554",
-
+      "system-ui, 'Segoe UI', Roboto, Arial, sans-serif",
     paddingBottom: "50px",
   },
 
-
   container: {
-    width:
-      "min(1200px, calc(100% - 50px))",
-
+    width: "min(1200px, calc(100% - 50px))",
     margin: "0 auto",
-
     paddingTop: "35px",
   },
 
 
-  /* =========================
-     HERO
-  ========================= */
+  /* HERO */
 
   hero: {
     display: "flex",
-
     alignItems: "center",
-
     justifyContent: "space-between",
-
     gap: "20px",
 
     padding: "28px 32px",
 
-    borderRadius: "22px",
+    borderRadius: "20px",
 
-    background:
-      "linear-gradient(135deg, #1e3a8a, #2563eb 55%, #7c3aed)",
+    background: "#302E36",
 
-    color: "white",
+    border: "1px solid #46414F",
 
     boxShadow:
-      "0 15px 40px rgba(37, 99, 235, 0.22)",
+      "0 10px 30px rgba(0,0,0,0.22)",
 
     marginBottom: "28px",
   },
 
-
   heroLeft: {
     display: "flex",
-
     alignItems: "center",
-
     gap: "18px",
   },
 
-
   heartCircle: {
     width: "62px",
-
     height: "62px",
 
-    borderRadius: "18px",
+    borderRadius: "16px",
 
     display: "flex",
-
     alignItems: "center",
-
     justifyContent: "center",
 
     background:
-      "rgba(255,255,255,0.16)",
+      "linear-gradient(135deg, #8B5CF6, #A855F7)",
 
     fontSize: "30px",
 
     boxShadow:
-      "inset 0 0 0 1px rgba(255,255,255,.15)",
+      "0 8px 20px rgba(139,92,246,0.25)",
   },
-
 
   heroTitle: {
     margin: 0,
@@ -419,19 +372,16 @@ const styles = {
 
     fontWeight: "800",
 
-    letterSpacing: "-0.5px",
+    color: "#F5F3FF",
   },
-
 
   heroSubtitle: {
     margin: "6px 0 0",
 
     fontSize: "14px",
 
-    color:
-      "rgba(255,255,255,.82)",
+    color: "#A9A6B8",
   },
-
 
   savedCount: {
     display: "flex",
@@ -448,36 +398,34 @@ const styles = {
 
     borderRadius: "14px",
 
-    background:
-      "rgba(255,255,255,.14)",
-  },
+    background: "#3A3842",
 
+    border: "1px solid #5B5663",
+  },
 
   countNumber: {
     fontSize: "27px",
 
     fontWeight: "800",
-  },
 
+    color: "#C4B5FD",
+  },
 
   countText: {
     fontSize: "11px",
 
-    color:
-      "rgba(255,255,255,.82)",
+    color: "#A9A6B8",
   },
 
 
-  /* =========================
-     EMPTY STATE
-  ========================= */
+  /* EMPTY STATE */
 
   emptyCard: {
     minHeight: "430px",
 
-    background: "rgba(255,255,255,.92)",
+    background: "#302E36",
 
-    borderRadius: "22px",
+    borderRadius: "20px",
 
     display: "flex",
 
@@ -491,13 +439,11 @@ const styles = {
 
     padding: "45px 25px",
 
-    border:
-      "1px solid #e2e8f0",
+    border: "1px solid #46414F",
 
     boxShadow:
-      "0 12px 35px rgba(15,23,42,.08)",
+      "0 10px 30px rgba(0,0,0,0.20)",
   },
-
 
   emptyIllustration: {
     width: "90px",
@@ -514,15 +460,12 @@ const styles = {
 
     fontSize: "45px",
 
-    background:
-      "linear-gradient(135deg,#eff6ff,#f5f3ff)",
+    background: "#3A3842",
+
+    border: "1px solid #5B5663",
 
     marginBottom: "20px",
-
-    boxShadow:
-      "0 10px 25px rgba(37,99,235,.10)",
   },
-
 
   emptyTitle: {
     margin: 0,
@@ -531,21 +474,18 @@ const styles = {
 
     fontWeight: "800",
 
-    color: "#172554",
+    color: "#F5F3FF",
   },
 
-
   emptyText: {
-    color: "#64748b",
+    color: "#A9A6B8",
 
     lineHeight: "1.7",
 
     fontSize: "14px",
 
-    margin:
-      "10px 0 22px",
+    margin: "10px 0 22px",
   },
-
 
   browseButton: {
     border: "none",
@@ -555,9 +495,9 @@ const styles = {
     borderRadius: "10px",
 
     background:
-      "linear-gradient(135deg,#2563eb,#7c3aed)",
+      "linear-gradient(135deg, #8B5CF6, #A855F7)",
 
-    color: "white",
+    color: "#FFFFFF",
 
     fontSize: "14px",
 
@@ -566,22 +506,34 @@ const styles = {
     cursor: "pointer",
 
     boxShadow:
-      "0 8px 20px rgba(37,99,235,.22)",
+      "0 8px 20px rgba(139,92,246,0.25)",
   },
 
 
-  /* =========================
-     SECTION
-  ========================= */
+  /* SECTION */
 
   sectionHeader: {
-    marginBottom: "18px",
+    marginBottom: "20px",
+  },
+
+  sectionTitle: {
+    margin: 0,
+
+    color: "#F5F3FF",
+
+    fontSize: "25px",
+  },
+
+  sectionSubtitle: {
+    margin: "6px 0 0",
+
+    color: "#A9A6B8",
+
+    fontSize: "14px",
   },
 
 
-  /* =========================
-     JOB GRID
-  ========================= */
+  /* JOB GRID */
 
   jobsGrid: {
     display: "grid",
@@ -593,27 +545,20 @@ const styles = {
   },
 
 
-  /* =========================
-     JOB CARD
-  ========================= */
+  /* JOB CARD */
 
   jobCard: {
-    background: "white",
+    background: "#302E36",
 
     borderRadius: "18px",
 
     padding: "22px",
 
-    border:
-      "1px solid #e2e8f0",
+    border: "1px solid #46414F",
 
     boxShadow:
-      "0 8px 28px rgba(15,23,42,.07)",
-
-    transition:
-      "transform .2s ease, box-shadow .2s ease",
+      "0 8px 25px rgba(0,0,0,0.18)",
   },
-
 
   jobTop: {
     display: "flex",
@@ -625,9 +570,8 @@ const styles = {
     paddingBottom: "18px",
 
     borderBottom:
-      "1px solid #e2e8f0",
+      "1px solid #46414F",
   },
-
 
   companyIcon: {
     width: "52px",
@@ -642,28 +586,29 @@ const styles = {
 
     justifyContent: "center",
 
-    background: "#eff6ff",
+    background: "#3A2E52",
 
     fontSize: "24px",
 
     flexShrink: 0,
   },
 
-
   jobHeading: {
     minWidth: 0,
   },
 
-
-  jobHeadingH2: {
+  jobTitle: {
     margin: 0,
-  },
 
+    color: "#F5F3FF",
+
+    fontSize: "20px",
+  },
 
   company: {
     margin: "5px 0 0",
 
-    color: "#64748b",
+    color: "#A9A6B8",
 
     fontSize: "13px",
 
@@ -671,9 +616,7 @@ const styles = {
   },
 
 
-  /* =========================
-     DETAILS
-  ========================= */
+  /* DETAILS */
 
   detailsGrid: {
     display: "grid",
@@ -686,7 +629,6 @@ const styles = {
     marginTop: "18px",
   },
 
-
   detailBox: {
     display: "flex",
 
@@ -694,47 +636,72 @@ const styles = {
 
     gap: "9px",
 
-    padding: "12px",
+    padding: "13px",
 
     borderRadius: "10px",
 
-    background: "#f8fafc",
-  },
+    background: "#3A3842",
 
+    border: "1px solid #46414F",
+  },
 
   detailIcon: {
     fontSize: "18px",
   },
 
-
-  detailBoxSmall: {
+  detailLabel: {
     display: "block",
+
+    color: "#A9A6B8",
+
+    fontSize: "11px",
+
+    marginBottom: "3px",
+  },
+
+  detailValue: {
+    display: "block",
+
+    color: "#F5F3FF",
+
+    fontSize: "13px",
   },
 
 
-  detailBoxStrong: {
-    display: "block",
-  },
-
-
-  /* =========================
-     DESCRIPTION
-  ========================= */
+  /* DESCRIPTION */
 
   description: {
     marginTop: "17px",
 
-    padding: "14px",
+    padding: "16px",
 
     borderRadius: "10px",
 
-    background: "#f8fafc",
+    background: "#3A3842",
+
+    border: "1px solid #46414F",
+  },
+
+  descriptionTitle: {
+    margin: "0 0 8px",
+
+    color: "#C4B5FD",
+
+    fontSize: "14px",
+  },
+
+  descriptionText: {
+    margin: 0,
+
+    color: "#A9A6B8",
+
+    fontSize: "13px",
+
+    lineHeight: "1.6",
   },
 
 
-  /* =========================
-     ACTIONS
-  ========================= */
+  /* ACTIONS */
 
   actions: {
     display: "flex",
@@ -743,7 +710,6 @@ const styles = {
 
     marginTop: "18px",
   },
-
 
   applyButton: {
     flex: 1,
@@ -755,28 +721,30 @@ const styles = {
     padding: "12px",
 
     background:
-      "linear-gradient(135deg,#2563eb,#7c3aed)",
+      "linear-gradient(135deg, #8B5CF6, #A855F7)",
 
-    color: "white",
+    color: "#FFFFFF",
 
     fontSize: "13px",
 
     fontWeight: "700",
 
     cursor: "pointer",
+
+    boxShadow:
+      "0 5px 15px rgba(139,92,246,0.20)",
   },
 
-
   removeButton: {
-    border: "1px solid #fecaca",
+    border: "1px solid #7F3A46",
 
     borderRadius: "9px",
 
     padding: "12px 17px",
 
-    background: "#fff1f2",
+    background: "#3A252C",
 
-    color: "#dc2626",
+    color: "#FCA5A5",
 
     fontSize: "13px",
 
@@ -786,12 +754,10 @@ const styles = {
   },
 
 
-  /* =========================
-     LOADING
-  ========================= */
+  /* LOADING */
 
   loadingPage: {
-    minHeight: "calc(100vh - 190px)",
+    minHeight: "calc(100vh - 70px)",
 
     display: "flex",
 
@@ -801,17 +767,27 @@ const styles = {
 
     justifyContent: "center",
 
-    background:
-      "linear-gradient(135deg,#f5f7ff,#eef4ff)",
+    background: "#24232A",
 
-    color: "#172554",
+    color: "#F5F3FF",
   },
-
 
   spinner: {
     fontSize: "42px",
 
     marginBottom: "10px",
+  },
+
+  loadingTitle: {
+    margin: "0 0 6px",
+
+    color: "#F5F3FF",
+  },
+
+  loadingText: {
+    margin: 0,
+
+    color: "#A9A6B8",
   },
 };
 
