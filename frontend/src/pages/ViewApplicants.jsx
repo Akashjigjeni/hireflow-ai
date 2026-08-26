@@ -306,7 +306,7 @@ function ViewApplicants() {
                       <img
                         src={
                           applicant.profileImage
-                            ? `http://localhost:5000/${applicant.profileImage}`
+                            ?`https://hireflow-ai-9xcf.vercel.app/${applicant.profileImage}`
                             : `https://ui-avatars.com/api/?name=${encodeURIComponent(
                                 applicantName
                               )}&background=7c3aed&color=ffffff`
@@ -439,7 +439,7 @@ function ViewApplicants() {
                     {app.resume ? (
 
                       <a
-                        href={`http://localhost:5000/${app.resume}`}
+                       href={`https://hireflow-ai-9xcf.vercel.app/${app.resume}`}
                         target="_blank"
                         rel="noreferrer"
                         style={styles.resumeButton}
