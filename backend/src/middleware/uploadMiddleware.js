@@ -2,10 +2,13 @@ const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
 
-// Upload folder
-const uploadPath = path.join(__dirname, "../../uploads");
+// Use /tmp on Vercel, local uploads folder during development
+const uploadPath =
+  process.env.VERCEL
+    ? "/tmp/uploads"
+    : path.join(__dirname, "../../uploads");
 
-// Create uploads folder if it doesn't exist
+// Create folder if it doesn't exist
 if (!fs.existsSync(uploadPath)) {
   fs.mkdirSync(uploadPath, { recursive: true });
 }
@@ -35,7 +38,10 @@ const fileFilter = (req, file, cb) => {
     ) {
       cb(null, true);
     } else {
-      cb(new Error("Only JPG, JPEG and PNG images are allowed"), false);
+      cb(
+        new Error("Only JPG, JPEG and PNG images are allowed"),
+        false
+      );
     }
   }
 
