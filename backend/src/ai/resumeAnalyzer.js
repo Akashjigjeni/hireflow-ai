@@ -1,13 +1,20 @@
 const fs = require("fs");
 const pdf = require("pdf-parse");
 
-const analyzeResume = async (resumePath, requiredSkills) => {
+const analyzeResume = async (resumeSource, requiredSkills, fallbackText = "") => {
   try {
-    const dataBuffer = fs.readFileSync(resumePath);
+    let dataBuffer;
+    if (Buffer.isBuffer(resumeSource)) {
+      dataBuffer = resumeSource;
+    } else if (typeof resumeSource === "string" && fs.existsSync(resumeSource)) {
+      dataBuffer = fs.readFileSync(resumeSource);
+    }
 
-    const pdfData = await pdf(dataBuffer);
-
-    const resumeText = pdfData.text.toLowerCase();
+    let resumeText = fallbackText ? fallbackText.toLowerCase() : "";
+    if (dataBuffer) {
+      const pdfData = await pdf(dataBuffer);
+      resumeText = (pdfData.text || "").toLowerCase() + " " + resumeText;
+    }
 
     const matchedSkills = [];
     const missingSkills = [];

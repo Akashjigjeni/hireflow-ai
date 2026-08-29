@@ -36,6 +36,13 @@ const analyzeApplicantResume = async (req, res) => {
       application.resume
     );
 
+    let resumeSource = resumePath;
+    if (!fs.existsSync(resumePath) && application.resumeData) {
+      resumeSource = Buffer.from(application.resumeData, "base64");
+    }
+
+    const fallbackCandidateText = `${application.applicant?.skills || ""} ${application.applicant?.education || ""} ${application.coverLetter || ""}`;
+
     const requiredSkills = [
       "Java",
       "React",
@@ -48,8 +55,9 @@ const analyzeApplicantResume = async (req, res) => {
     ];
 
     const result = await analyzeResume(
-      resumePath,
-      requiredSkills
+      resumeSource,
+      requiredSkills,
+      fallbackCandidateText
     );
 
     res.json({

@@ -18,11 +18,22 @@ const applyToJob = async (req, res) => {
       });
     }
 
+    const fs = require("fs");
+    let resumeData = "";
+    if (req.file) {
+      try {
+        resumeData = fs.readFileSync(req.file.path, { encoding: "base64" });
+      } catch (fileErr) {
+        console.error("Could not read uploaded file into base64:", fileErr.message);
+      }
+    }
+
     const application = await Application.create({
       job: jobId,
       applicant: req.user._id,
       coverLetter,
       resume: req.file ? `uploads/${req.file.filename}` : "",
+      resumeData,
     });
 
     res.status(201).json(application);

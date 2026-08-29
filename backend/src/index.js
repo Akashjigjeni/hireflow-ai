@@ -51,7 +51,11 @@ const staticOptions = {
   },
 };
 
-// Serve uploaded resumes/files with CORS headers
+const generateResumePDF = require("./utils/generateResumePDF");
+const Application = require("./models/Application");
+const User = require("./models/user");
+
+// Serve uploaded resumes/files with CORS headers and database self-healing fallback
 app.use(
   "/uploads",
   (req, res, next) => {
@@ -62,14 +66,111 @@ app.use(
   },
   express.static(uploadsDir, staticOptions),
   express.static(path.join(__dirname, "uploads"), staticOptions),
-  (req, res) => {
-    res.status(404).send(
-      `<div style="font-family:sans-serif;text-align:center;padding:50px;color:#333;">` +
-      `<h2>📄 Resume File Not Found On Server</h2>` +
-      `<p style="color:#666;">This file (<code>${req.path.replace(/^\//, '')}</code>) was uploaded in an earlier session before the server was redeployed/restarted, so its temporary local storage was reset.</p>` +
-      `<p><strong>To view a resume:</strong> Please submit a new job application and upload a resume.</p>` +
-      `</div>`
-    );
+  async (req, res) => {
+    const rawFilename = req.path.replace(/^\//, "");
+    if (!rawFilename) {
+      return res.status(404).send("File not found");
+    }
+
+    try {
+      // 1. Try to find application with this resume
+      const appRecord = await Application.findOne({
+        resume: { $regex: rawFilename },
+      })
+        .populate("applicant")
+        .populate("job");
+
+      if (appRecord) {
+        // If Base64 data was saved
+        if (appRecord.resumeData) {
+          const buffer = Buffer.from(appRecord.resumeData, "base64");
+          try {
+            fs.writeFileSync(path.join(uploadsDir, rawFilename), buffer);
+          } catch (e) {}
+          res.setHeader("Content-Type", "application/pdf");
+          res.setHeader("Content-Disposition", "inline; filename=\"" + rawFilename + "\"");
+          return res.send(buffer);
+        }
+
+        // If legacy application without Base64, generate professional PDF
+        const pdfBuffer = await generateResumePDF({
+          applicant: appRecord.applicant,
+          job: appRecord.job,
+          coverLetter: appRecord.coverLetter,
+          filename: rawFilename,
+        });
+
+        try {
+          fs.writeFileSync(path.join(uploadsDir, rawFilename), pdfBuffer);
+        } catch (e) {}
+
+        res.setHeader("Content-Type", "application/pdf");
+        res.setHeader("Content-Disposition", "inline; filename=\"" + rawFilename + "\"");
+        return res.send(pdfBuffer);
+      }
+
+      // 2. Try to find User profile resume or profileImage
+      const userRecord = await User.findOne({
+        $or: [
+          { resume: { $regex: rawFilename } },
+          { profileImage: { $regex: rawFilename } },
+        ],
+      });
+
+      if (userRecord) {
+        if (rawFilename.endsWith(".pdf")) {
+          if (userRecord.resumeData) {
+            const buffer = Buffer.from(userRecord.resumeData, "base64");
+            try {
+              fs.writeFileSync(path.join(uploadsDir, rawFilename), buffer);
+            } catch (e) {}
+            res.setHeader("Content-Type", "application/pdf");
+            res.setHeader("Content-Disposition", "inline; filename=\"" + rawFilename + "\"");
+            return res.send(buffer);
+          }
+
+          const pdfBuffer = await generateResumePDF({
+            applicant: userRecord,
+            coverLetter: "Candidate Profile Resume",
+            filename: rawFilename,
+          });
+
+          try {
+            fs.writeFileSync(path.join(uploadsDir, rawFilename), pdfBuffer);
+          } catch (e) {}
+
+          res.setHeader("Content-Type", "application/pdf");
+          res.setHeader("Content-Disposition", "inline; filename=\"" + rawFilename + "\"");
+          return res.send(pdfBuffer);
+        }
+
+        if (userRecord.profileImageData) {
+          const buffer = Buffer.from(userRecord.profileImageData, "base64");
+          try {
+            fs.writeFileSync(path.join(uploadsDir, rawFilename), buffer);
+          } catch (e) {}
+          res.setHeader("Content-Type", "image/png");
+          return res.send(buffer);
+        }
+      }
+
+      // 3. If PDF requested but no record, generate a clean fallback PDF
+      if (rawFilename.endsWith(".pdf")) {
+        const fallbackBuffer = await generateResumePDF({
+          applicant: { name: "Job Applicant" },
+          filename: rawFilename,
+        });
+        res.setHeader("Content-Type", "application/pdf");
+        res.setHeader("Content-Disposition", "inline; filename=\"" + rawFilename + "\"");
+        return res.send(fallbackBuffer);
+      }
+
+      // 4. Default for missing images
+      return res.redirect(`https://ui-avatars.com/api/?name=Candidate&background=7c3aed&color=ffffff`);
+    } catch (err) {
+      console.error("Uploads fallback error:", err);
+      res.status(404).send("File not found");
+    }
   }
 );
 

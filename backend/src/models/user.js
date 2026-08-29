@@ -55,7 +55,17 @@ const userSchema = new mongoose.Schema(
       default: "",
     },
 
+    profileImageData: {
+      type: String,
+      default: "",
+    },
+
     resume: {
+      type: String,
+      default: "",
+    },
+
+    resumeData: {
       type: String,
       default: "",
     },

@@ -43,14 +43,30 @@ const updateProfile = async (req, res) => {
     user.education = req.body.education || user.education;
     user.skills = req.body.skills || user.skills;
 
+    const fs = require("fs");
+
     if (req.files?.profileImage) {
       user.profileImage =
         "uploads/" + req.files.profileImage[0].filename;
+      try {
+        user.profileImageData = fs.readFileSync(req.files.profileImage[0].path, {
+          encoding: "base64",
+        });
+      } catch (err) {
+        console.error("Failed to read profileImage buffer:", err.message);
+      }
     }
 
     if (req.files?.resume) {
       user.resume =
         "uploads/" + req.files.resume[0].filename;
+      try {
+        user.resumeData = fs.readFileSync(req.files.resume[0].path, {
+          encoding: "base64",
+        });
+      } catch (err) {
+        console.error("Failed to read resume buffer:", err.message);
+      }
     }
 
     const updatedUser = await user.save();
