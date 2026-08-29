@@ -37,7 +37,7 @@ const registerUser = async (req, res) => {
         id: user._id,
         role: user.role,
       },
-      process.env.JWT_SECRET,
+      process.env.JWT_SECRET || "hireflow_jwt_default_secret_key_2026",
       {
         expiresIn: "7d",
       }
@@ -103,7 +103,7 @@ const loginUser = async (req, res) => {
         id: user._id,
         role: user.role,
       },
-      process.env.JWT_SECRET,
+      process.env.JWT_SECRET || "hireflow_jwt_default_secret_key_2026",
       {
         expiresIn: "7d",
       }
