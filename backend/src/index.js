@@ -27,12 +27,30 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+const fs = require("fs");
+
 // =========================
 // Serve Static Uploads
 // =========================
 
+const uploadsDir = process.env.VERCEL
+  ? "/tmp/uploads"
+  : path.join(__dirname, "../uploads");
+
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
+// Serve uploaded resumes/files with CORS headers
 app.use(
   "/uploads",
+  (req, res, next) => {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Methods", "GET, HEAD, OPTIONS");
+    res.header("Access-Control-Allow-Headers", "Content-Type");
+    next();
+  },
+  express.static(uploadsDir),
   express.static(path.join(__dirname, "uploads"))
 );
 
@@ -79,3 +97,5 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`🚀 Server is running on port ${PORT}`);
 });
+
+module.exports = app;
