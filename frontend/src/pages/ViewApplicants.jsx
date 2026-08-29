@@ -563,11 +563,10 @@ function ViewApplicants() {
                         </div>
 
                         <div style={styles.scoreBox}>
-                          <strong>
+                          <strong style={styles.scoreNumber}>
                             {analysis[app._id].score}%
                           </strong>
-
-                          <span>
+                          <span style={styles.scoreLabel}>
                             Match Score
                           </span>
                         </div>
@@ -1154,14 +1153,32 @@ const styles = {
 
 
   scoreBox: {
-    minWidth: "100px",
-    padding: "12px",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: "4px",
+    minWidth: "110px",
+    padding: "12px 16px",
     borderRadius: "14px",
     textAlign: "center",
     background:
       "rgba(124,58,237,0.16)",
     border:
       "1px solid rgba(167,139,250,0.25)",
+  },
+
+  scoreNumber: {
+    fontSize: "20px",
+    fontWeight: "800",
+    color: "#a78bfa",
+  },
+
+  scoreLabel: {
+    fontSize: "12px",
+    fontWeight: "600",
+    color: "#c4b5fd",
+    letterSpacing: "0.5px",
   },
 
 
