@@ -41,6 +41,16 @@ if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
 
+const staticOptions = {
+  setHeaders: (res, filePath) => {
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    if (filePath.endsWith(".pdf")) {
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader("Content-Disposition", "inline");
+    }
+  },
+};
+
 // Serve uploaded resumes/files with CORS headers
 app.use(
   "/uploads",
@@ -50,8 +60,17 @@ app.use(
     res.header("Access-Control-Allow-Headers", "Content-Type");
     next();
   },
-  express.static(uploadsDir),
-  express.static(path.join(__dirname, "uploads"))
+  express.static(uploadsDir, staticOptions),
+  express.static(path.join(__dirname, "uploads"), staticOptions),
+  (req, res) => {
+    res.status(404).send(
+      `<div style="font-family:sans-serif;text-align:center;padding:50px;color:#333;">` +
+      `<h2>📄 Resume File Not Found On Server</h2>` +
+      `<p style="color:#666;">This file (<code>${req.path.replace(/^\//, '')}</code>) was uploaded in an earlier session before the server was redeployed/restarted, so its temporary local storage was reset.</p>` +
+      `<p><strong>To view a resume:</strong> Please submit a new job application and upload a resume.</p>` +
+      `</div>`
+    );
+  }
 );
 
 // =========================

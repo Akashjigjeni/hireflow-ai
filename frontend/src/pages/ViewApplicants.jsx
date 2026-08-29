@@ -11,8 +11,16 @@ function ViewApplicants() {
   const [analysis, setAnalysis] = useState({});
   const [questions, setQuestions] = useState({});
   const [coverLetters, setCoverLetters] = useState({});
-  const [loading, setLoading] = useState(true);
   const backendBaseUrl = (import.meta.env.VITE_API_URL || "http://localhost:5000/api").replace(/\/api\/?$/, "");
+
+  const getMediaUrl = (filePath) => {
+    if (!filePath) return "";
+    if (filePath.startsWith("http://") || filePath.startsWith("https://")) {
+      return filePath;
+    }
+    const cleanPath = filePath.replace(/\\/g, "/").replace(/^\/+/, "");
+    return `${backendBaseUrl}/${cleanPath}`;
+  };
 
   const fetchApplicants = async () => {
     try {
@@ -307,7 +315,7 @@ function ViewApplicants() {
                       <img
                         src={
                           applicant.profileImage
-                            ? `${backendBaseUrl}/${applicant.profileImage}`
+                            ? getMediaUrl(applicant.profileImage)
                             : `https://ui-avatars.com/api/?name=${encodeURIComponent(
                                 applicantName
                               )}&background=7c3aed&color=ffffff`
@@ -440,7 +448,7 @@ function ViewApplicants() {
                     {app.resume ? (
 
                       <a
-                        href={`${backendBaseUrl}/${app.resume}`}
+                        href={getMediaUrl(app.resume)}
                         target="_blank"
                         rel="noreferrer"
                         style={styles.resumeButton}
