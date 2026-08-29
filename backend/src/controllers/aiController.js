@@ -1,3 +1,4 @@
+const fs = require("fs");
 const path = require("path");
 
 const Application = require("../models/Application");
@@ -24,35 +25,88 @@ const analyzeApplicantResume = async (req, res) => {
       });
     }
 
-    if (!application.resume) {
-      return res.status(400).json({
-        message: "Candidate has not uploaded a resume.",
-      });
-    }
+    const resumePath = application.resume
+      ? path.join(__dirname, "../../", application.resume)
+      : "";
 
-    const resumePath = path.join(
-      __dirname,
-      "../../",
-      application.resume
-    );
-
-    let resumeSource = resumePath;
-    if (!fs.existsSync(resumePath) && application.resumeData) {
+    let resumeSource = null;
+    if (resumePath && fs.existsSync(resumePath)) {
+      resumeSource = resumePath;
+    } else if (application.resumeData) {
       resumeSource = Buffer.from(application.resumeData, "base64");
+    } else if (application.applicant?.resumeData) {
+      resumeSource = Buffer.from(application.applicant.resumeData, "base64");
     }
 
-    const fallbackCandidateText = `${application.applicant?.skills || ""} ${application.applicant?.education || ""} ${application.coverLetter || ""}`;
+    // Aggregate candidate data
+    const fallbackCandidateText = [
+      application.applicant?.skills || "",
+      application.applicant?.education || "",
+      application.applicant?.name || "",
+      application.applicant?.location || "",
+      application.coverLetter || "",
+    ].join(" ");
 
-    const requiredSkills = [
-      "Java",
-      "React",
-      "Node",
-      "MongoDB",
-      "Express",
-      "HTML",
-      "CSS",
-      "JavaScript",
-    ];
+    // Determine Job Required Skills dynamically based on Job
+    let requiredSkills = [];
+
+    // 1. From job.skills array if specified
+    if (Array.isArray(application.job?.skills) && application.job.skills.length > 0) {
+      requiredSkills = application.job.skills.flatMap((s) =>
+        typeof s === "string"
+          ? s.split(",").map((item) => item.trim()).filter(Boolean)
+          : []
+      );
+    }
+
+    // 2. If empty, deduce from Job Title & Description
+    if (requiredSkills.length === 0) {
+      const jobContext = `${application.job?.title || ""} ${application.job?.description || ""}`.toLowerCase();
+
+      if (
+        jobContext.includes("front") ||
+        jobContext.includes("react") ||
+        jobContext.includes("web")
+      ) {
+        requiredSkills = ["React", "JavaScript", "HTML", "CSS", "Node.js"];
+      } else if (
+        jobContext.includes("back") ||
+        jobContext.includes("node") ||
+        jobContext.includes("api")
+      ) {
+        requiredSkills = ["Node.js", "Express", "MongoDB", "JavaScript", "REST API"];
+      } else if (
+        jobContext.includes("full") ||
+        jobContext.includes("mern")
+      ) {
+        requiredSkills = [
+          "React",
+          "Node.js",
+          "MongoDB",
+          "Express",
+          "JavaScript",
+          "HTML",
+          "CSS",
+        ];
+      } else if (
+        jobContext.includes("python") ||
+        jobContext.includes("data") ||
+        jobContext.includes("ai")
+      ) {
+        requiredSkills = ["Python", "SQL", "Git", "REST API"];
+      } else if (jobContext.includes("java")) {
+        requiredSkills = ["Java", "SQL", "Git", "REST API"];
+      } else {
+        requiredSkills = [
+          "React",
+          "JavaScript",
+          "HTML",
+          "CSS",
+          "Node.js",
+          "MongoDB",
+        ];
+      }
+    }
 
     const result = await analyzeResume(
       resumeSource,
@@ -61,16 +115,14 @@ const analyzeApplicantResume = async (req, res) => {
     );
 
     res.json({
-      candidate: application.applicant.name,
-      job: application.job.title,
+      candidate: application.applicant?.name || "Candidate",
+      job: application.job?.title || "Job Position",
       score: result.score,
       matchedSkills: result.matchedSkills,
       missingSkills: result.missingSkills,
     });
   } catch (err) {
-    console.error("RESUME ANALYSIS ERROR:");
-    console.error(err);
-
+    console.error("RESUME ANALYSIS ERROR:", err);
     res.status(500).json({
       message: "Server Error",
       error: err.message,
