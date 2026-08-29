@@ -12,6 +12,7 @@ function ViewApplicants() {
   const [questions, setQuestions] = useState({});
   const [coverLetters, setCoverLetters] = useState({});
   const [loading, setLoading] = useState(true);
+  const backendBaseUrl = (import.meta.env.VITE_API_URL || "http://localhost:5000/api").replace(/\/api\/?$/, "");
 
   const fetchApplicants = async () => {
     try {
@@ -306,7 +307,7 @@ function ViewApplicants() {
                       <img
                         src={
                           applicant.profileImage
-                            ?`https://hireflow-ai-9xcf.vercel.app/${applicant.profileImage}`
+                            ? `${backendBaseUrl}/${applicant.profileImage}`
                             : `https://ui-avatars.com/api/?name=${encodeURIComponent(
                                 applicantName
                               )}&background=7c3aed&color=ffffff`
@@ -439,7 +440,7 @@ function ViewApplicants() {
                     {app.resume ? (
 
                       <a
-                       href={`https://hireflow-ai-9xcf.vercel.app/${app.resume}`}
+                        href={`${backendBaseUrl}/${app.resume}`}
                         target="_blank"
                         rel="noreferrer"
                         style={styles.resumeButton}
